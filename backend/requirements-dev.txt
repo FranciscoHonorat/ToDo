@@ -3,3 +3,6 @@ pytest
 httpx2
 import-linter
 flake8
+pyyaml
+jsonschema
+openapi-spec-validator
