@@ -1,0 +1,72 @@
+{{- $name := include "todo.backend.name" . -}}
+{{- $b := .Values.backend -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}-data
+  labels: {{- include "todo.labels" . | nindent 4 }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  {{- with $b.persistence.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $b.persistence.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels: {{- include "todo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {{- include "todo.selectorLabels" (list . "backend") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "todo.selectorLabels" (list . "backend") | nindent 8 }}
+    spec:
+      securityContext:
+        {{- include "todo.podSecurityContext" . | nindent 8 }}
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: backend
+          image: {{ include "todo.image" $b.image }}
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          securityContext: {{- include "todo.containerSecurityContext" . | nindent 12 }}
+          env:
+            - name: TODO_DATABASE
+              value: /data/todo.db
+            - name: API_ROOT_PATH
+              value: /api
+          ports:
+            - name: http
+              containerPort: {{ $b.port }}
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+          resources: {{- toYaml $b.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ $name }}-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels: {{- include "todo.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "todo.selectorLabels" (list . "backend") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ $b.port }}
+      targetPort: http

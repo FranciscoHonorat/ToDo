@@ -1,0 +1,350 @@
+# Arquivo gerado por backend/export_openapi.py — não edite à mão (rode `make openapi`).
+openapi: 3.1.0
+info:
+  title: ToDo API
+  description: |
+    API de tarefas do projeto ToDo.
+
+    Erros de regra de negócio retornam `{"detail": "<mensagem>"}`; erros de formato
+    (JSON inválido, UUID malformado, status desconhecido) seguem o padrão do FastAPI,
+    com `detail` sendo uma lista.
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      tags:
+      - infra
+      summary: Healthcheck
+      description: Usado pelos healthchecks do Docker e pelas probes do Kubernetes.
+      operationId: health
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthOutput'
+  /tasks:
+    get:
+      tags:
+      - tasks
+      summary: Lista tarefas
+      description: Retorna as tarefas na ordem de criação.
+      operationId: list_tasks
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/StatusFilter'
+          - type: 'null'
+          description: Filtra por status; omitido = todas.
+          title: Status
+        description: Filtra por status; omitido = todas.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskOutput'
+                title: Response List Tasks
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - tasks
+      summary: Cria uma tarefa
+      description: A tarefa nasce com status `PENDING`.
+      operationId: create_task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskOutput'
+        '422':
+          description: Título vazio (`detail` é texto) ou corpo/parâmetros malformados
+            (`detail` é lista).
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - $ref: '#/components/schemas/HTTPValidationError'
+  /tasks/{task_id}:
+    get:
+      tags:
+      - tasks
+      summary: Busca uma tarefa
+      description: Retorna a tarefa com o id informado.
+      operationId: get_task
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Task Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskOutput'
+        '404':
+          description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - tasks
+      summary: Edita uma tarefa
+      description: Substitui título e descrição. O status não muda.
+      operationId: edit_task
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Task Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskOutput'
+        '404':
+          description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Título vazio (`detail` é texto) ou corpo/parâmetros malformados
+            (`detail` é lista).
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - tasks
+      summary: Remove uma tarefa
+      description: Remove definitivamente a tarefa.
+      operationId: delete_task
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Task Id
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /tasks/{task_id}/complete:
+    post:
+      tags:
+      - tasks
+      summary: Conclui uma tarefa
+      description: Muda o status para `COMPLETED`. Concluir uma tarefa já concluída
+        não é erro.
+      operationId: complete_task
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Task Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskOutput'
+        '404':
+          description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    ErrorResponse:
+      properties:
+        detail:
+          type: string
+          title: Detail
+          description: Mensagem de erro de regra de negócio.
+      type: object
+      required:
+      - detail
+      title: ErrorResponse
+      examples:
+      - detail: Title cannot be empty.
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    HealthOutput:
+      properties:
+        status:
+          type: string
+          title: Status
+          examples:
+          - ok
+      type: object
+      required:
+      - status
+      title: HealthOutput
+    Status:
+      type: string
+      enum:
+      - PENDING
+      - COMPLETED
+      title: Status
+    StatusFilter:
+      type: string
+      enum:
+      - pending
+      - completed
+      title: StatusFilter
+    TaskInput:
+      properties:
+        title:
+          type: string
+          title: Title
+          description: Título da tarefa. Não pode ser vazio nem só espaços.
+        description:
+          type: string
+          title: Description
+          description: Detalhes opcionais.
+          default: ''
+      type: object
+      required:
+      - title
+      title: TaskInput
+      examples:
+      - description: Na padaria da esquina
+        title: Comprar pão
+    TaskOutput:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+          description: Identificador gerado pelo servidor.
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+        status:
+          $ref: '#/components/schemas/Status'
+      type: object
+      required:
+      - id
+      - title
+      - description
+      - status
+      title: TaskOutput
+      examples:
+      - description: Na padaria da esquina
+        id: 3f1c2b9e-8a4d-4c1e-9b7a-2d5e6f708192
+        status: PENDING
+        title: Comprar pão
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+tags:
+- name: tasks
+  description: Criação, consulta, edição, conclusão e remoção de tarefas.
+- name: infra
+  description: Endpoints operacionais (healthcheck).

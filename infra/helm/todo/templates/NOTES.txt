@@ -1,0 +1,9 @@
+ToDo instalado como "{{ .Release.Name }}".
+
+{{- if .Values.ingress.enabled }}
+Acesse: http://{{ .Values.ingress.host }}
+{{- else }}
+Acesse com port-forward:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "todo.frontend.name" . }} 8080:{{ .Values.service.port }}
+  abra http://localhost:8080
+{{- end }}

@@ -1,0 +1,33 @@
+backend:
+  image:
+    repository: todo-backend
+    tag: local
+    pullPolicy: IfNotPresent
+  port: 8000
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { memory: 256Mi }
+  persistence:
+    # SQLite é um arquivo: o backend roda com 1 réplica e estratégia Recreate.
+    size: 1Gi
+    storageClass: ""   # vazio = StorageClass padrão do cluster
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: todo-frontend
+    tag: local
+    pullPolicy: IfNotPresent
+  port: 8080
+  resources:
+    requests: { cpu: 20m, memory: 32Mi }
+    limits: { memory: 128Mi }
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  host: todo.local

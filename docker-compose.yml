@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: ./backend
+    image: todo-backend:local
+    environment:
+      API_ROOT_PATH: /api
+    volumes:
+      - todo-data:/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    image: todo-frontend:local
+    environment:
+      API_URL: http://backend:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  todo-data:

@@ -1,0 +1,45 @@
+{{- $name := include "todo.frontend.name" . -}}
+{{- $f := .Values.frontend -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels: {{- include "todo.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $f.replicaCount }}
+  selector:
+    matchLabels: {{- include "todo.selectorLabels" (list . "frontend") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "todo.selectorLabels" (list . "frontend") | nindent 8 }}
+    spec:
+      securityContext: {{- include "todo.podSecurityContext" . | nindent 8 }}
+      containers:
+        - name: frontend
+          image: {{ include "todo.image" $f.image }}
+          imagePullPolicy: {{ $f.image.pullPolicy }}
+          securityContext: {{- include "todo.containerSecurityContext" . | nindent 12 }}
+          env:
+            - name: API_URL
+              value: http://{{ include "todo.backend.name" . }}:{{ .Values.backend.port }}
+          ports:
+            - name: http
+              containerPort: {{ $f.port }}
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+          resources: {{- toYaml $f.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels: {{- include "todo.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector: {{- include "todo.selectorLabels" (list . "frontend") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http

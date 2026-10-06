@@ -1,0 +1,42 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = ["e2e: sobe o servidor real (uvicorn) e testa via HTTP"]
+
+[tool.importlinter]
+root_packages = ["domain", "application", "persistence", "api", "ui"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Camadas: adaptadores -> application -> domain"
+type = "layers"
+layers = ["api | ui", "application", "domain"]
+
+[[tool.importlinter.contracts]]
+name = "Domain é puro: não conhece frameworks nem banco"
+type = "forbidden"
+source_modules = ["domain"]
+forbidden_modules = ["application", "persistence", "api", "ui", "fastapi", "pydantic", "sqlite3"]
+
+[[tool.importlinter.contracts]]
+name = "Application depende só do domain (DIP): não conhece persistência nem HTTP"
+type = "forbidden"
+source_modules = ["application"]
+forbidden_modules = ["persistence", "api", "ui", "fastapi", "pydantic", "sqlite3"]
+
+[[tool.importlinter.contracts]]
+name = "Persistence implementa portas do domain, não usa casos de uso nem adaptadores"
+type = "forbidden"
+source_modules = ["persistence"]
+forbidden_modules = ["application", "api", "ui", "fastapi"]
+
+[[tool.importlinter.contracts]]
+name = "Adaptadores de entrada não instanciam persistência (só a composition root)"
+type = "forbidden"
+source_modules = ["api", "ui"]
+forbidden_modules = ["persistence", "sqlite3"]
+
+[[tool.importlinter.contracts]]
+name = "Adaptadores de entrada são independentes entre si"
+type = "independence"
+modules = ["api", "ui"]

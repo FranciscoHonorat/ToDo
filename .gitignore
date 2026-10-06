@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Testes e ferramentas
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Banco de dados local (o schema.sql continua versionado)
+*.db
+*.sqlite3
+
+# Variáveis de ambiente
+.env
+
+# Editores e sistema
+.vscode/
+.idea/
+.DS_Store
+
+# Frontend
+node_modules/
+frontend/dist/
+.import_linter_cache/
+playwright-report/
+test-results/
+load/results/

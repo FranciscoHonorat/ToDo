@@ -1,0 +1,6 @@
+apiVersion: v2
+name: todo
+description: ToDo — API FastAPI (SQLite) + frontend Vue servido por nginx
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
