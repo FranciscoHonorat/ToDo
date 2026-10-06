@@ -112,6 +112,9 @@ jobs:
             - name: Check OpenTofu formatting
               run: |
                   tofu fmt -check
+            - name: Initialize OpenTofu
+              run: |
+                  tofu init -backend=false
             - name: Validate OpenTofu configuration
               run: |
                   tofu validate
