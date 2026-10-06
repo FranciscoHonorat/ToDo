@@ -1,5 +1,8 @@
 # To Do List
 
+[![CI](https://github.com/FranciscoHonorat/ToDo/actions/workflows/ci.yml/badge.svg)](https://github.com/FranciscoHonorat/ToDo/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/FranciscoHonorat/ToDo/actions/workflows/codeql.yml/badge.svg)](https://github.com/FranciscoHonorat/ToDo/actions/workflows/codeql.yml)
+
 Aplicação de tarefas desenvolvida com TDD: backend Python em camadas (FastAPI + SQLite) e frontend Vue 3.
 
 ```
@@ -17,6 +20,10 @@ frontend/
   src/composables/  useTasks — estado e casos de uso da tela
   src/components/   TaskForm, TaskItem, TaskFilter
   tests/            Vitest + FakeTaskApi em memória
+infra/helm/todo/    chart Helm (Kubernetes)
+load/               teste de carga (Vegeta + Locust)
+docs/openapi.yaml   especificação da API
+.github/            CI, CodeQL e Dependabot
 ```
 
 ## Rodando
@@ -92,6 +99,26 @@ completa, todos os erros, restart do servidor e requisições concorrentes.
 
 - `backend/tests/test_repository_contract.py` roda os mesmos testes contra as duas implementações de repositório.
 - `frontend/tests/fakeTaskApi.ts` é o equivalente do `MemoryRepository` no frontend.
+
+**Lint:** o backend segue o PEP 8, verificado pelo `flake8` (configuração em `backend/.flake8`, linhas de até 120
+caracteres). Para rodar: `cd backend && flake8 .`
+
+## CI/CD (GitHub Actions)
+
+Todo push e pull request para `master` dispara os workflows em `.github/workflows/`:
+
+| Workflow | Job | O que faz |
+|----------|-----|-----------|
+| `ci.yml` | Backend · lint, unit tests | `flake8` + `pytest` (Python 3.14) |
+| `ci.yml` | Backend · security checks | `bandit` (análise de segurança, sem a pasta `tests/`) |
+| `ci.yml` | Frontend · typecheck, unit tests | `vue-tsc` + `vitest` (Node 24) |
+| `codeql.yml` | Analyze (python / javascript-typescript) | análise de segurança do GitHub; roda também todo domingo |
+
+O CI instala apenas o que está em `backend/requirements-dev.txt` e `frontend/package-lock.json`. Se um teste
+passa localmente mas falha no CI com `ModuleNotFoundError`, falta o pacote no `requirements-dev.txt`.
+
+O **Dependabot** (`.github/dependabot.yml`) abre PRs semanais atualizando pip, npm, as imagens base dos
+Dockerfiles e as actions. Atualizações minor/patch vêm agrupadas num único PR; as major vêm separadas.
 
 ## Teste de carga (Vegeta + Locust)
 
