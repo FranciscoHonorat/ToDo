@@ -5,6 +5,7 @@ from persistence.memory_repository import MemoryRepository
 import pytest
 import uuid
 
+
 def test_created_task_appears_in_list():
     memory = MemoryRepository()
     service = TaskService(memory)
@@ -15,6 +16,7 @@ def test_created_task_appears_in_list():
     assert tasks[0].title == "Test Task"
     assert tasks[0].description == "Test Description"
 
+
 def test_create_task_returns_the_created_task():
     memory = MemoryRepository()
     service = TaskService(memory)
@@ -23,6 +25,7 @@ def test_create_task_returns_the_created_task():
 
     assert task.title == "Test Task"
     assert task.description == "Test Description"
+
 
 def test_get_task_returns_task_by_id():
     memory = MemoryRepository()
@@ -33,6 +36,7 @@ def test_get_task_returns_task_by_id():
 
     assert found.id == created.id
 
+
 def test_complete_task_marks_it_as_completed():
     memory = MemoryRepository()
     service = TaskService(memory)
@@ -42,11 +46,13 @@ def test_complete_task_marks_it_as_completed():
 
     assert task.status is Status.COMPLETED
 
+
 def test_complete_task_with_unknown_id_raises_task_not_found_error():
     memory = MemoryRepository()
     service = TaskService(memory)
     with pytest.raises(TaskNotFoundError):
         service.complete_task(uuid.uuid4())
+
 
 def test_get_task_by_id_with_unknown_id_raises_task_not_found_error():
     memory = MemoryRepository()
@@ -64,6 +70,7 @@ def test_complete_task_is_persisted_in_repository():
 
     assert memory.get_task_by_id(task.id).status is Status.COMPLETED
 
+
 def test_list_tasks_filters_by_status():
     memory = MemoryRepository()
     service = TaskService(memory)
@@ -74,6 +81,7 @@ def test_list_tasks_filters_by_status():
     completed = service.list_tasks(Status.COMPLETED)
 
     assert [task.id for task in completed] == [done.id]
+
 
 def test_edit_task_changes_title_and_description():
     memory = MemoryRepository()
@@ -86,10 +94,12 @@ def test_edit_task_changes_title_and_description():
     assert found.title == "New"
     assert found.description == "New description"
 
+
 def test_edit_task_with_unknown_id_raises_task_not_found_error():
     service = TaskService(MemoryRepository())
     with pytest.raises(TaskNotFoundError):
         service.edit_task(uuid.uuid4(), "New", "")
+
 
 def test_delete_task_removes_it_from_list():
     memory = MemoryRepository()
@@ -99,6 +109,7 @@ def test_delete_task_removes_it_from_list():
     service.delete_task(task.id)
 
     assert service.list_tasks() == []
+
 
 def test_delete_task_with_unknown_id_raises_task_not_found_error():
     service = TaskService(MemoryRepository())

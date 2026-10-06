@@ -3,6 +3,7 @@ from domain.task import Task
 from domain.task_repository import TaskRepository
 from domain.exceptions import TaskNotFoundError
 
+
 class TaskService:
     def __init__(self, repository: TaskRepository):
         self.repository = repository
@@ -11,7 +12,7 @@ class TaskService:
         task = Task(title, description)
         self.repository.add_task(task)
         return task
-    
+
     def list_tasks(self, status=None):
         tasks = self.repository.get_all_tasks()
         if status is None:

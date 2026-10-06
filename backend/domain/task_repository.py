@@ -3,6 +3,7 @@ import uuid
 
 from domain.task import Task
 
+
 class TaskRepository(Protocol):
     def add_task(self, task: Task) -> None:
         ...

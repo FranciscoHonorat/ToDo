@@ -4,6 +4,7 @@ import uuid
 from domain.exceptions import InvalidTitleError
 from domain.status import Status
 
+
 class Task:
     def __init__(self, title, description, id=None, status=Status.PENDING):
         self._validate_title(title)
