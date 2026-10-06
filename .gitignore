@@ -36,3 +36,9 @@ frontend/dist/
 playwright-report/
 test-results/
 load/results/
+
+# OpenTofu
+.terraform/
+*.tfstate
+*.tfstate.*
+infra/tofu/todo-config
