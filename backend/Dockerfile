@@ -1,12 +1,12 @@
 # ---- build: instala as dependências num venv isolado ----
-FROM python:3.14-slim AS build
+FROM python:3.15-slim AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 RUN python -m venv /venv
 COPY requirements.txt .
 RUN /venv/bin/pip install -r requirements.txt
 
 # ---- runtime: só o venv + o código, rodando sem root ----
-FROM python:3.14-slim
+FROM python:3.15-slim
 ENV PATH="/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
