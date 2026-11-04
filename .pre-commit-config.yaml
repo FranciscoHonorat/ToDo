@@ -1,0 +1,51 @@
+# Roda antes de cada `git commit`. Instalar uma vez: `cd backend && poetry run pre-commit install`
+# Rodar em tudo:  `cd backend && poetry run pre-commit run --all-files`
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^infra/helm/.*/templates/   # templates do Helm não são YAML válido antes de renderizar
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.10.1
+    hooks:
+      - id: black
+        args: [--config=backend/pyproject.toml]
+        files: ^backend/
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.4.1
+    hooks:
+      - id: flake8
+        args: [--config=backend/.flake8]
+        files: ^backend/
+
+  # Hooks locais: usam as ferramentas já instaladas no projeto.
+  - repo: local
+    hooks:
+      - id: import-linter
+        name: import-linter (camadas do backend)
+        entry: bash -c 'cd backend && poetry run lint-imports'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: vue-tsc
+        name: vue-tsc (type-check do frontend)
+        entry: npm --prefix frontend run typecheck
+        language: system
+        files: ^frontend/.*\.(ts|vue)$
+        pass_filenames: false
+
+      - id: tofu-fmt
+        name: tofu fmt
+        entry: tofu fmt -check -recursive infra/tofu
+        language: system
+        files: \.tf$
+        pass_filenames: false

@@ -1,3 +1,5 @@
 [flake8]
 max-line-length = 120
-exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
+# Regras que brigam com o Black (recomendação da documentação do Black)
+extend-ignore = E203,E701,E704
+exclude = .git,__pycache__,.venv,docs/source/conf.py,old,build,dist

@@ -6,3 +6,5 @@ tests
 db/*.db
 Dockerfile
 .dockerignore
+.venv
+poetry.toml

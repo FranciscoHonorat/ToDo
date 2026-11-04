@@ -86,9 +86,7 @@ def test_complete_task_returns_completed_task(client):
 def test_edit_task_returns_edited_task(client):
     created = create(client).json()
 
-    response = client.put(
-        f"/tasks/{created['id']}", json={"title": "Novo", "description": "nova"}
-    )
+    response = client.put(f"/tasks/{created['id']}", json={"title": "Novo", "description": "nova"})
 
     assert response.status_code == 200
     assert response.json()["title"] == "Novo"

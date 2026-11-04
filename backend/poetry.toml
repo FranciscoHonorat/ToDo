@@ -1,0 +1,3 @@
+# O ambiente virtual fica em backend/.venv (assim `poetry run`, o makefile e o Playwright usam o mesmo)
+[virtualenvs]
+in-project = true

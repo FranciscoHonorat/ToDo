@@ -1,3 +1,37 @@
+[project]
+name = "todo-backend"
+version = "0.1.0"
+description = "API e CLI do ToDo (domain / application / persistence / api / ui)"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "fastapi>=0.142.2",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "httpx2>=2.13.1",
+    "import-linter>=2.15",
+    "flake8>=7.4.1",
+    "pyyaml>=6.0.3",
+    "jsonschema>=4.26.0",
+    "openapi-spec-validator>=0.9.0",
+    "pre-commit>=4.0",
+    "black>=26.10.1",
+]
+load = [
+    "locust>=2.46.7",
+]
+
+# Aplicação, não biblioteca: o Poetry só gerencia dependências, não empacota o código.
+[tool.poetry]
+package-mode = false
+
+# Teste de carga (load/): só instala com `poetry install --with load`.
+[tool.poetry.group.load]
+optional = true
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
@@ -40,3 +74,6 @@ forbidden_modules = ["persistence", "sqlite3"]
 name = "Adaptadores de entrada são independentes entre si"
 type = "independence"
 modules = ["api", "ui"]
+
+[tool.black]
+line-length = 120   # igual ao max-line-length do .flake8

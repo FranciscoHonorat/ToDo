@@ -84,5 +84,11 @@ def test_operation_ids_are_the_handler_names(spec):
     operation_ids = {op["operationId"] for ops in spec["paths"].values() for op in ops.values()}
 
     assert operation_ids == {
-        "health", "list_tasks", "create_task", "get_task", "edit_task", "complete_task", "delete_task",
+        "health",
+        "list_tasks",
+        "create_task",
+        "get_task",
+        "edit_task",
+        "complete_task",
+        "delete_task",
     }

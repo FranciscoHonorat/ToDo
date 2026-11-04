@@ -1,4 +1,5 @@
 """Gera docs/openapi.yaml a partir do código. Uso: python export_openapi.py"""
+
 from pathlib import Path
 
 import yaml

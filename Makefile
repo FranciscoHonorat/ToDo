@@ -1,14 +1,30 @@
-PY := $(CURDIR)/.venv/bin/python
+PY := $(CURDIR)/backend/.venv/bin/python
 CHART := infra/helm/todo
 KIND_CLUSTER := todo
 
-.PHONY: install test test-backend test-frontend test-arch test-e2e openapi load load-vegeta load-locust load-ui api web cli \
+.PHONY: install lint lint-backend lint-frontend lint-infra format \
+        test test-backend test-frontend test-arch test-e2e openapi load load-vegeta load-locust load-ui api web cli \
         up down k8s-up k8s-down
 
 install:
-	python3 -m venv .venv
-	$(PY) -m pip install -r backend/requirements-dev.txt -r load/requirements.txt
+	cd backend && poetry install --with load
 	cd frontend && npm install && npx playwright install chromium
+
+## Lint e formatação ------------------------------------------------------
+lint: lint-backend lint-frontend lint-infra   # só verifica, não altera nada (igual ao CI)
+
+lint-backend:            # estilo (flake8), formatação (black) e camadas (import-linter)
+	cd backend && $(PY) -m flake8 . && $(PY) -m black --check . && .venv/bin/lint-imports
+
+lint-frontend:           # type-check
+	cd frontend && npx vue-tsc --noEmit
+
+lint-infra:
+	tofu fmt -check -recursive infra/tofu
+
+format:                  # reescreve os arquivos: black no backend, tofu fmt na infra
+	cd backend && $(PY) -m black .
+	tofu fmt -recursive infra/tofu
 
 ## Testes ---------------------------------------------------------------
 test: test-backend test-frontend test-e2e
