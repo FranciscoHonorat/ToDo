@@ -1,4 +1,5 @@
 """Valida respostas HTTP reais contra docs/openapi.yaml."""
+
 import re
 from functools import cache
 from pathlib import Path
@@ -26,9 +27,9 @@ def _template_for(path: str) -> str:
 def assert_matches_spec(method: str, path: str, status: int, body):
     template = _template_for(path)
     responses = _spec()["paths"][template][method.lower()]["responses"]
-    assert str(status) in responses, (
-        f"{method} {template} respondeu {status}, mas o spec só documenta {sorted(responses)}"
-    )
+    assert (
+        str(status) in responses
+    ), f"{method} {template} respondeu {status}, mas o spec só documenta {sorted(responses)}"
 
     content = responses[str(status)].get("content")
     if content is None:

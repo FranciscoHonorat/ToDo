@@ -30,7 +30,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: EXTERNAL_BASE_URL ? [] : [
     {
-      command: `../.venv/bin/python -m uvicorn server:app --port ${API_PORT}`,
+      command: `.venv/bin/python -m uvicorn server:app --port ${API_PORT}`,
       cwd: '../backend',
       env: { TODO_DATABASE: process.env.E2E_DATABASE },
       url: `${API_URL}/tasks`,

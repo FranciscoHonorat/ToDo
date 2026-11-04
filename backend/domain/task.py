@@ -1,4 +1,3 @@
-
 import uuid
 
 from domain.exceptions import InvalidTitleError

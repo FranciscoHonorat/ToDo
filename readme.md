@@ -114,8 +114,9 @@ Todo push e pull request para `master` dispara os workflows em `.github/workflow
 | `ci.yml` | Frontend · typecheck, unit tests | `vue-tsc` + `vitest` (Node 24) |
 | `codeql.yml` | Analyze (python / javascript-typescript) | análise de segurança do GitHub; roda também todo domingo |
 
-O CI instala apenas o que está em `backend/requirements-dev.txt` e `frontend/package-lock.json`. Se um teste
-passa localmente mas falha no CI com `ModuleNotFoundError`, falta o pacote no `requirements-dev.txt`.
+O CI instala apenas o que está em `backend/poetry.lock` e `frontend/package-lock.json`. Se um teste
+passa localmente mas falha no CI com `ModuleNotFoundError`, falta o pacote no `backend/pyproject.toml`
+(adicione com `poetry add --group dev <pacote>`).
 
 O **Dependabot** (`.github/dependabot.yml`) abre PRs semanais atualizando pip, npm, as imagens base dos
 Dockerfiles e as actions. Atualizações minor/patch vêm agrupadas num único PR; as major vêm separadas.

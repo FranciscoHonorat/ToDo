@@ -21,7 +21,7 @@ SPAWN="${SPAWN:-10}"
 SEED="${SEED:-200}"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PY="$ROOT/.venv/bin/python"
+PY="$ROOT/backend/.venv/bin/python"
 VEGETA="$(command -v vegeta || echo "$HOME/go/bin/vegeta")"
 OUT="$ROOT/load/results/$(date +%Y%m%d-%H%M%S)"
 WORK="$(mktemp -d)"

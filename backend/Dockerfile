@@ -1,9 +1,10 @@
 # ---- build: instala as dependências num venv isolado ----
 FROM python:3.14-slim AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
-RUN python -m venv /venv
-COPY requirements.txt .
-RUN /venv/bin/pip install -r requirements.txt
+RUN pip install poetry==2.3.2 && python -m venv /venv
+COPY pyproject.toml poetry.lock ./
+# VIRTUAL_ENV faz o Poetry instalar no /venv; --only main deixa de fora as ferramentas de dev
+RUN VIRTUAL_ENV=/venv poetry install --only main --no-interaction
 
 # ---- runtime: só o venv + o código, rodando sem root ----
 FROM python:3.14-slim

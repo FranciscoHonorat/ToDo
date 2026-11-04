@@ -71,7 +71,10 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         return service.create_task(body.title, body.description)
 
     @app.get(
-        "/tasks/{task_id}", tags=["tasks"], response_model=TaskOutput, responses=NOT_FOUND,
+        "/tasks/{task_id}",
+        tags=["tasks"],
+        response_model=TaskOutput,
+        responses=NOT_FOUND,
         summary="Busca uma tarefa",
     )
     def get_task(task_id: uuid.UUID):
@@ -90,7 +93,10 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         return service.edit_task(task_id, body.title, body.description)
 
     @app.post(
-        "/tasks/{task_id}/complete", tags=["tasks"], response_model=TaskOutput, responses=NOT_FOUND,
+        "/tasks/{task_id}/complete",
+        tags=["tasks"],
+        response_model=TaskOutput,
+        responses=NOT_FOUND,
         summary="Conclui uma tarefa",
     )
     def complete_task(task_id: uuid.UUID):
@@ -115,4 +121,5 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
 def _error_handler(code):
     async def handler(request: Request, error: Exception):
         return JSONResponse(status_code=code, content={"detail": str(error)})
+
     return handler

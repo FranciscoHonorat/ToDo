@@ -7,7 +7,6 @@ from persistence.connection import get_connection  # noqa: F401
 
 from persistence.sqlite_repository import SqliteRepository
 
-
 DEFAULT_DATABASE_PATH = Path(__file__).resolve().parent / "db" / "todo.db"
 
 

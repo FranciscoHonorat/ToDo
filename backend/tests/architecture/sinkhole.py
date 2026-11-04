@@ -4,25 +4,18 @@ Um método é um repasse puro quando seu corpo (ignorando docstring) é uma úni
 chamada `self.<colaborador>.<metodo>(...)` que recebe exatamente os mesmos
 parâmetros do método, na mesma ordem — ou seja, a camada não acrescenta nada.
 """
+
 import ast
 import inspect
 import textwrap
 
 
 def public_methods(cls) -> list[str]:
-    return sorted(
-        name
-        for name, member in vars(cls).items()
-        if inspect.isfunction(member) and not name.startswith("_")
-    )
+    return sorted(name for name, member in vars(cls).items() if inspect.isfunction(member) and not name.startswith("_"))
 
 
 def find_pass_through_methods(cls, collaborator: str) -> list[str]:
-    return [
-        name
-        for name in public_methods(cls)
-        if _is_pass_through(_function_node(getattr(cls, name)), collaborator)
-    ]
+    return [name for name in public_methods(cls) if _is_pass_through(_function_node(getattr(cls, name)), collaborator)]
 
 
 def _function_node(function) -> ast.FunctionDef:

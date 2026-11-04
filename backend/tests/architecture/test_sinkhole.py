@@ -10,6 +10,6 @@ def test_task_service_is_not_an_architecture_sinkhole():
     pass_through = find_pass_through_methods(TaskService, collaborator="repository")
     ratio = len(pass_through) / len(public_methods(TaskService))
 
-    assert ratio <= MAX_PASS_THROUGH_RATIO, (
-        f"{ratio:.0%} dos casos de uso só repassam para o repositório: {pass_through}"
-    )
+    assert (
+        ratio <= MAX_PASS_THROUGH_RATIO
+    ), f"{ratio:.0%} dos casos de uso só repassam para o repositório: {pass_through}"
