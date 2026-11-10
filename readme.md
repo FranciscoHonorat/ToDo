@@ -124,13 +124,13 @@ Dockerfiles e as actions. Atualizações minor/patch vêm agrupadas num único P
 ## Teste de carga (Vegeta + Locust)
 
 ```bash
-make load            # Vegeta (leitura e escrita) + Locust, num servidor próprio com banco temporário
+make load            # Vegeta (leitura e escrita) + Locust, cada cenário com servidor e banco próprios
 make load-vegeta     # só Vegeta: taxa constante, mede latência honesta (p50/p95/p99)
 make load-locust     # só Locust: usuários simulados com fluxo misto (~70% leitura)
 make load-ui         # interface web do Locust em http://localhost:8089 (aponta para TARGET ou :8000)
 
 RATE=300 DURATION=30s USERS=100 SPAWN=20 make load    # ajustes
-TARGET=http://localhost:8080/api make load            # contra o compose (GRAVA dados lá)
+TARGET=http://localhost:8080/api make load            # contra o compose (GRAVA dados lá; banco compartilhado)
 ```
 
 Os resultados ficam em `load/results/<data-hora>/`: `vegeta-*.txt|json|html` (relatório, histograma e
@@ -141,15 +141,7 @@ então a latência medida é honesta. O Locust simula **usuários** (modelo fech
 antes da próxima requisição. O locustfile usa pausa aleatória porque `constant_throughput` sincroniza os
 usuários em rajadas, o que criava fila artificial (p50 de 6 ms → 34 ms com a mesma vazão).
 
-**Medição de referência** (notebook, 8 CPUs, 1 worker uvicorn, ataques de 5 s, ordem de grandeza):
-
-| Taxa | Leitura (GET /tasks/{id}) p50 | Escrita (POST /tasks) p50 |
-|------|------|------|
-| 300 req/s | 1,6 ms | 1,9 ms |
-| 600 req/s | 1,7 ms | **450 ms** (vazão real 571/s, saturado) |
-| 1000 req/s | **3,4 s** (vazão real 636/s, saturado) | **4,7 s** (vazão real 560/s) |
-
-A escrita satura primeiro (~570/s), mas a leitura satura logo depois (~635/s): o gargalo atual é **um
+Numa medição de referência (notebook, 8 CPUs, 1 worker uvicorn), a escrita satura primeiro (~570/s), mas a leitura satura logo depois (~635/s): o gargalo atual é **um
 processo Python**, não o SQLite. Mais workers do uvicorn ajudariam a leitura, mas não a escrita: cada
 worker abriria sua própria conexão e o SQLite continua aceitando um escritor por vez. Para escalar escrita,
 o caminho é Postgres.

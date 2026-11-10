@@ -4,8 +4,11 @@
 # Uso:  load/run.sh [vegeta|locust|all]
 #
 # Variáveis (com padrão):
-#   TARGET=              URL da API. Vazio = sobe um uvicorn próprio com banco temporário.
-#                        Ex.: TARGET=http://localhost:8080/api (compose). CUIDADO: grava dados lá.
+#   TARGET=              URL da API. Vazio = cada cenário (vegeta-read, vegeta-write, locust)
+#                        sobe seu próprio uvicorn com um banco temporário novo, para que os dados
+#                        gravados por um cenário não deixem o seguinte mais lento.
+#                        Ex.: TARGET=http://localhost:8080/api (compose). CUIDADO: grava dados lá,
+#                        e os cenários compartilham o mesmo banco (os resultados se contaminam).
 #   RATE=100             Vegeta: requisições por segundo.
 #   DURATION=15s         Duração de cada ataque/execução.
 #   USERS=50             Locust: usuários simultâneos.
@@ -26,24 +29,46 @@ VEGETA="$(command -v vegeta || echo "$HOME/go/bin/vegeta")"
 OUT="$ROOT/load/results/$(date +%Y%m%d-%H%M%S)"
 WORK="$(mktemp -d)"
 SERVER_PID=""
+EXTERNAL_TARGET="${TARGET:-}"
 mkdir -p "$OUT"
 
+stop_server() {
+  if [[ -n "$SERVER_PID" ]]; then
+    kill "$SERVER_PID" 2>/dev/null || true
+    wait "$SERVER_PID" 2>/dev/null || true
+    SERVER_PID=""
+  fi
+}
+
 cleanup() {
-  [[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" 2>/dev/null && wait "$SERVER_PID" 2>/dev/null || true
+  stop_server
   rm -rf "$WORK"
 }
 trap cleanup EXIT
 
+# Sobe um uvicorn com banco vazio em $WORK/<nome>.db e aponta TARGET para ele.
 start_server() {
-  local port
+  local name="$1" port db
+  db="$WORK/$name.db"
   port="$("$PY" -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])')"
   TARGET="http://127.0.0.1:$port"
-  echo "→ subindo uvicorn em $TARGET (banco temporário $WORK/load.db)"
-  (cd "$ROOT/backend" && TODO_DATABASE="$WORK/load.db" exec "$PY" -m uvicorn server:app \
+  echo "→ [$name] subindo uvicorn em $TARGET (banco novo $db)"
+  (cd "$ROOT/backend" && TODO_DATABASE="$db" exec "$PY" -m uvicorn server:app \
       --port "$port" --no-access-log --log-level warning) &
   SERVER_PID=$!
   for _ in $(seq 50); do curl -sf "$TARGET/health" >/dev/null && return; sleep 0.2; done
   echo "uvicorn não subiu" >&2; exit 1
+}
+
+# Cada cenário começa num servidor e banco novos, a menos que TARGET seja externo.
+fresh_server() {
+  local name="$1"
+  if [[ -n "$EXTERNAL_TARGET" ]]; then
+    echo "→ [$name] usando TARGET=$TARGET (banco compartilhado entre cenários)"
+    return
+  fi
+  stop_server
+  start_server "$name"
 }
 
 # Executa um ataque do Vegeta e gera relatório texto, JSON, histograma e gráfico HTML.
@@ -61,6 +86,7 @@ attack() {
 }
 
 run_vegeta() {
+  fresh_server vegeta-read
   echo "→ criando $SEED tarefas de base"
   : > "$WORK/ids"
   for _ in $(seq "$SEED"); do
@@ -71,24 +97,25 @@ run_vegeta() {
   # Leitura: GET /tasks/{id} em rodízio pelas tarefas criadas.
   sed "s#^#GET $TARGET/tasks/#" "$WORK/ids" | sed 'a\\' > "$WORK/read.txt"
 
-  # Escrita: POST /tasks com corpo JSON.
+  attack read "$WORK/read.txt"
+
+  # Escrita: POST /tasks com corpo JSON, num banco novo (não herda as tarefas de base).
+  fresh_server vegeta-write
   echo '{"title":"vegeta","description":"carga"}' > "$WORK/body.json"
   printf 'POST %s/tasks\nContent-Type: application/json\n@%s\n\n' "$TARGET" "$WORK/body.json" \
     > "$WORK/write.txt"
 
-  attack read "$WORK/read.txt"
   attack write "$WORK/write.txt"
 }
 
 run_locust() {
+  fresh_server locust
   echo
   echo "━━ Locust: $USERS usuários (+$SPAWN/s) por $DURATION ━━"
   "$PY" -m locust -f "$ROOT/load/locustfile.py" --headless --host "$TARGET" \
     -u "$USERS" -r "$SPAWN" -t "$DURATION" --only-summary \
     --csv "$OUT/locust" --html "$OUT/locust.html" 2>&1 | grep -v RuntimeWarning
 }
-
-if [[ -z "${TARGET:-}" ]]; then start_server; else echo "→ usando TARGET=$TARGET"; fi
 
 case "$MODE" in
   vegeta) run_vegeta ;;
