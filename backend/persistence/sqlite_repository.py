@@ -5,6 +5,14 @@ import uuid
 from domain.status import Status
 from domain.task import Task
 
+# Queries fixas (sem montar SQL com f-string): o valor do filtro sempre vai como parâmetro.
+LIST_ALL = "SELECT id, title, description, status FROM tasks ORDER BY created_at, rowid LIMIT ? OFFSET ?"
+LIST_BY_STATUS = (
+    "SELECT id, title, description, status FROM tasks WHERE status = ? ORDER BY created_at, rowid LIMIT ? OFFSET ?"
+)
+COUNT_ALL = "SELECT COUNT(*) FROM tasks"
+COUNT_BY_STATUS = "SELECT COUNT(*) FROM tasks WHERE status = ?"
+
 
 class SqliteRepository:
     def __init__(self, connection: sqlite3.Connection):
@@ -23,17 +31,18 @@ class SqliteRepository:
         return self.find_tasks()
 
     def find_tasks(self, status=None, limit=None, offset=0):
-        where, parameters = self._status_filter(status)
         # LIMIT -1 = sem limite no SQLite; o OFFSET exige um LIMIT.
-        rows = self._read(
-            f"SELECT id, title, description, status FROM tasks{where} ORDER BY created_at, rowid LIMIT ? OFFSET ?",
-            (*parameters, -1 if limit is None else limit, offset),
-        )
+        page = (-1 if limit is None else limit, offset)
+        if status is None:
+            rows = self._read(LIST_ALL, page)
+        else:
+            rows = self._read(LIST_BY_STATUS, (status.value, *page))
         return [self._to_task(row) for row in rows]
 
     def count_tasks(self, status=None):
-        where, parameters = self._status_filter(status)
-        return self._read(f"SELECT COUNT(*) FROM tasks{where}", parameters)[0][0]
+        if status is None:
+            return self._read(COUNT_ALL)[0][0]
+        return self._read(COUNT_BY_STATUS, (status.value,))[0][0]
 
     def get_task_by_id(self, task_id: uuid.UUID):
         rows = self._read("SELECT id, title, description, status FROM tasks WHERE id = ?", (str(task_id),))
@@ -55,10 +64,6 @@ class SqliteRepository:
     def _write(self, sql, parameters):
         with self._lock, self.connection:
             self.connection.execute(sql, parameters)
-
-    @staticmethod
-    def _status_filter(status):
-        return (" WHERE status = ?", (status.value,)) if status else ("", ())
 
     @staticmethod
     def _to_task(row):
