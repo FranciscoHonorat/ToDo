@@ -124,17 +124,27 @@ Dockerfiles e as actions. Atualizações minor/patch vêm agrupadas num único P
 ## Teste de carga (Vegeta + Locust)
 
 ```bash
-make load            # Vegeta (leitura e escrita) + Locust, cada cenário com servidor e banco próprios
+make load            # Vegeta (leitura, listagem, escrita) + Locust, cada cenário com servidor e banco próprios
+make load-volumes    # a mesma carga com bancos de 0, 1k, 10k e 100k tarefas (≈1 min por volume)
 make load-vegeta     # só Vegeta: taxa constante, mede latência honesta (p50/p95/p99)
 make load-locust     # só Locust: usuários simulados com fluxo misto (~70% leitura)
 make load-ui         # interface web do Locust em http://localhost:8089 (aponta para TARGET ou :8000)
 
 RATE=300 DURATION=30s USERS=100 SPAWN=20 make load    # ajustes
+VOLUMES="5000 50000" PENDING_PCT=30 make load         # volumes e proporção de pendentes do seed
+LIST_LIMIT=0 make load-volumes                        # listagem sem paginação (como o frontend faz hoje)
 TARGET=http://localhost:8080/api make load            # contra o compose (GRAVA dados lá; banco compartilhado)
 ```
 
-Os resultados ficam em `load/results/<data-hora>/`: `vegeta-*.txt|json|html` (relatório, histograma e
-gráfico) e `locust.html` + CSVs.
+**Estado dos dados é variável do teste.** Cada cenário começa num banco novo populado por `load/seed.py`
+com exatamente `VOLUMES` tarefas (gravadas direto no SQLite: 100 mil em menos de 1 s). Os cenários que
+escrevem fazem o banco crescer durante a própria rodada, então o script registra **total e pendentes no
+início e no fim** de cada cenário (pelo cabeçalho `X-Total-Count`, que também funciona com `TARGET`
+externo). O cenário `vegeta list` só lê, então mede a listagem com volume constante.
+
+Os resultados ficam em `load/results/<data-hora>/`: `summary.md` / `summary.csv` (uma linha por volume e
+cenário, com p50/p95/p99, vazão, bytes por resposta e as contagens), `counts.csv`, e em `seed-<N>/` os
+`vegeta-*.txt|json|html` (relatório, histograma e gráfico) e `locust.html` + CSVs.
 
 **Vegeta × Locust:** o Vegeta dispara numa **taxa fixa** (modelo aberto), mesmo se o servidor ficar lento,
 então a latência medida é honesta. O Locust simula **usuários** (modelo fechado): cada um espera a resposta
