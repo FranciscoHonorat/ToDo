@@ -29,7 +29,7 @@ paths:
       tags:
       - tasks
       summary: Lista tarefas
-      description: Retorna as tarefas na ordem de criação.
+      description: Retorna as tarefas na ordem de criação, opcionalmente paginadas.
       operationId: list_tasks
       parameters:
       - name: status
@@ -42,9 +42,31 @@ paths:
           description: Filtra por status; omitido = todas.
           title: Status
         description: Filtra por status; omitido = todas.
+      - name: limit
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 1000
+            minimum: 1
+          - type: 'null'
+          description: Máximo de tarefas na página; omitido = todas.
+          title: Limit
+        description: Máximo de tarefas na página; omitido = todas.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Quantas tarefas pular (depois do filtro).
+          default: 0
+          title: Offset
+        description: Quantas tarefas pular (depois do filtro).
       responses:
         '200':
-          description: Successful Response
+          description: Tarefas da página pedida.
           content:
             application/json:
               schema:
@@ -52,6 +74,12 @@ paths:
                 items:
                   $ref: '#/components/schemas/TaskOutput'
                 title: Response List Tasks
+          headers:
+            X-Total-Count:
+              description: Total de tarefas com o filtro de status, ignorando `limit`/`offset`.
+              schema:
+                type: integer
+                minimum: 0
         '422':
           description: Validation Error
           content:

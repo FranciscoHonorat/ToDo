@@ -1,6 +1,14 @@
+from dataclasses import dataclass
+
 from domain.task import Task
 from domain.task_repository import TaskRepository
 from domain.exceptions import TaskNotFoundError
+
+
+@dataclass(frozen=True)
+class TaskPage:
+    items: list[Task]
+    total: int  # quantas tarefas existem com o filtro, ignorando limit/offset
 
 
 class TaskService:
@@ -13,10 +21,11 @@ class TaskService:
         return task
 
     def list_tasks(self, status=None):
-        tasks = self.repository.get_all_tasks()
-        if status is None:
-            return tasks
-        return [task for task in tasks if task.status is status]
+        return self.repository.find_tasks(status)
+
+    def list_page(self, status=None, limit=None, offset=0):
+        items = self.repository.find_tasks(status, limit, offset)
+        return TaskPage(items, self.repository.count_tasks(status))
 
     def get_task_by_id(self, task_id):
         task = self.repository.get_task_by_id(task_id)

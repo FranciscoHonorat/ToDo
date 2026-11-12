@@ -115,3 +115,24 @@ def test_delete_task_with_unknown_id_raises_task_not_found_error():
     service = TaskService(MemoryRepository())
     with pytest.raises(TaskNotFoundError):
         service.delete_task(uuid.uuid4())
+
+
+def test_list_page_returns_the_requested_slice_and_the_filtered_total():
+    service = TaskService(MemoryRepository())
+    tasks = [service.create_task(f"T{n}", "") for n in range(5)]
+    service.complete_task(tasks[0].id)
+
+    page = service.list_page(Status.PENDING, limit=2, offset=1)
+
+    assert [task.id for task in page.items] == [tasks[2].id, tasks[3].id]
+    assert page.total == 4
+
+
+def test_list_page_without_limit_returns_everything():
+    service = TaskService(MemoryRepository())
+    tasks = [service.create_task(f"T{n}", "") for n in range(3)]
+
+    page = service.list_page()
+
+    assert [task.id for task in page.items] == [task.id for task in tasks]
+    assert page.total == 3

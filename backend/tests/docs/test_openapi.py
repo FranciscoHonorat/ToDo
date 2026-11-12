@@ -64,6 +64,13 @@ def test_task_schemas_have_examples(spec):
     assert schemas["TaskOutput"].get("examples")
 
 
+def test_list_tasks_documents_paging_and_total_header(spec):
+    operation = spec["paths"]["/tasks"]["get"]
+
+    assert {parameter["name"] for parameter in operation["parameters"]} == {"status", "limit", "offset"}
+    assert "X-Total-Count" in operation["responses"]["200"]["headers"]
+
+
 def test_task_status_is_documented_as_enum(spec):
     status = spec["components"]["schemas"]["Status"]
 

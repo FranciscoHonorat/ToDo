@@ -67,7 +67,7 @@ make cli ARGS="list --status pending"
 | Método | Rota                     | Resposta |
 |--------|--------------------------|----------|
 | GET    | /health                  | 200 |
-| GET    | /tasks?status=pending    | 200 lista / 422 status inválido |
+| GET    | /tasks?status=pending&limit=50&offset=0 | 200 lista + `X-Total-Count` / 422 status ou paginação inválidos (`limit` 1–1000, opcional) |
 | POST   | /tasks                   | 201 tarefa / 422 título vazio ou corpo inválido |
 | GET    | /tasks/{id}              | 200 / 404 / 422 id malformado |
 | PUT    | /tasks/{id}              | 200 / 404 / 422 |
