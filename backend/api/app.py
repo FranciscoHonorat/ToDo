@@ -5,7 +5,9 @@ from fastapi.responses import JSONResponse, Response
 
 from api.schemas import (
     INVALID_TASK,
+    MAX_PAGE_SIZE,
     NOT_FOUND,
+    TOTAL_COUNT,
     HealthOutput,
     StatusFilter,
     TaskInput,
@@ -51,12 +53,25 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         """Usado pelos healthchecks do Docker e pelas probes do Kubernetes."""
         return {"status": "ok"}
 
-    @app.get("/tasks", tags=["tasks"], response_model=list[TaskOutput], summary="Lista tarefas")
+    @app.get(
+        "/tasks",
+        tags=["tasks"],
+        response_model=list[TaskOutput],
+        responses=TOTAL_COUNT,
+        summary="Lista tarefas",
+    )
     def list_tasks(
+        response: Response,
         status: StatusFilter | None = Query(None, description="Filtra por status; omitido = todas."),
+        limit: int | None = Query(
+            None, ge=1, le=MAX_PAGE_SIZE, description="Máximo de tarefas na página; omitido = todas."
+        ),
+        offset: int = Query(0, ge=0, description="Quantas tarefas pular (depois do filtro)."),
     ):
-        """Retorna as tarefas na ordem de criação."""
-        return service.list_tasks(to_status(status))
+        """Retorna as tarefas na ordem de criação, opcionalmente paginadas."""
+        page = service.list_page(to_status(status), limit, offset)
+        response.headers["X-Total-Count"] = str(page.total)
+        return page.items
 
     @app.post(
         "/tasks",

@@ -11,6 +11,14 @@ class MemoryRepository:
     def get_all_tasks(self):
         return list(self.tasks)
 
+    def find_tasks(self, status=None, limit=None, offset=0):
+        matching = [task for task in self.tasks if status is None or task.status is status]
+        end = None if limit is None else offset + limit
+        return matching[offset:end]
+
+    def count_tasks(self, status=None):
+        return len(self.find_tasks(status))
+
     def get_task_by_id(self, task_id: uuid.UUID):
         for task in self.tasks:
             if task.id == task_id:

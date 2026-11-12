@@ -65,6 +65,32 @@ def test_list_tasks_with_invalid_status_returns_422(client):
     assert client.get("/tasks", params={"status": "whatever"}).status_code == 422
 
 
+def test_list_tasks_pages_with_limit_and_offset(client):
+    for title in "ABCDE":
+        create(client, title=title)
+
+    response = client.get("/tasks", params={"limit": 2, "offset": 1})
+
+    assert [task["title"] for task in response.json()] == ["B", "C"]
+
+
+def test_list_tasks_reports_the_filtered_total_in_a_header(client):
+    done = create(client, title="Done").json()
+    create(client, title="P1")
+    create(client, title="P2")
+    client.post(f"/tasks/{done['id']}/complete")
+
+    response = client.get("/tasks", params={"status": "pending", "limit": 1})
+
+    assert len(response.json()) == 1
+    assert response.headers["X-Total-Count"] == "2"
+
+
+@pytest.mark.parametrize("params", [{"limit": 0}, {"limit": 1001}, {"offset": -1}])
+def test_list_tasks_with_invalid_paging_returns_422(client, params):
+    assert client.get("/tasks", params=params).status_code == 422
+
+
 def test_get_task_returns_it(client):
     created = create(client).json()
 

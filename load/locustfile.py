@@ -4,9 +4,14 @@ Cada usuário simulado cria algumas tarefas e depois navega: lista muito,
 abre tarefas, edita e conclui de vez em quando. Os pesos de @task definem
 a proporção de cada ação (aqui ~70% leitura, ~30% escrita).
 """
+import os
 import random
 
 from locust import HttpUser, between, task
+
+# Tamanho da página na listagem (0 = sem paginação, como o frontend lista hoje).
+LIST_LIMIT = int(os.environ.get("LIST_LIMIT", "50"))
+LIST_PARAMS = {"status": "pending", **({"limit": LIST_LIMIT} if LIST_LIMIT > 0 else {})}
 
 
 class TodoUser(HttpUser):
@@ -33,7 +38,8 @@ class TodoUser(HttpUser):
 
     @task(4)
     def list_pending(self):
-        self.client.get("/tasks?status=pending", name="/tasks?status=pending")
+        # O nome fica fixo para o relatório agrupar, com ou sem limit.
+        self.client.get("/tasks", params=LIST_PARAMS, name="/tasks?status=pending")
 
     @task(3)
     def get_task(self):
