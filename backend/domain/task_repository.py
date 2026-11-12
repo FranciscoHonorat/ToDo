@@ -1,6 +1,7 @@
 from typing import Protocol
 import uuid
 
+from domain.status import Status
 from domain.task import Task
 
 
@@ -8,6 +9,12 @@ class TaskRepository(Protocol):
     def add_task(self, task: Task) -> None: ...
 
     def get_all_tasks(self) -> list[Task]: ...
+
+    def find_tasks(self, status: Status | None = None, limit: int | None = None, offset: int = 0) -> list[Task]:
+        """Tarefas na ordem de criação, filtradas por status e paginadas."""
+        ...
+
+    def count_tasks(self, status: Status | None = None) -> int: ...
 
     def get_task_by_id(self, task_id: uuid.UUID) -> Task | None: ...
 

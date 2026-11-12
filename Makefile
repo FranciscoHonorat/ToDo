@@ -3,7 +3,7 @@ CHART := infra/helm/todo
 KIND_CLUSTER := todo
 
 .PHONY: install lint lint-backend lint-frontend lint-infra format \
-        test test-backend test-frontend test-arch test-e2e openapi load load-vegeta load-locust load-ui api web cli \
+        test test-backend test-frontend test-arch test-e2e openapi load load-volumes load-vegeta load-locust load-ui api web cli \
         up down k8s-up k8s-down
 
 install:
@@ -49,9 +49,12 @@ openapi:                 # regenera docs/openapi.yaml a partir do código
 
 ## Carga -----------------------------------------------------------------
 # Sobe um servidor próprio com banco temporário (ou use TARGET=http://...).
-# Ajustes: RATE=200 DURATION=30s USERS=100 SPAWN=20 make load
+# Ajustes: RATE=200 DURATION=30s USERS=100 SPAWN=20 VOLUMES=10000 PENDING_PCT=30 LIST_LIMIT=0 make load
 load:
 	load/run.sh all
+
+load-volumes:            # mesma carga em bancos de tamanhos crescentes (≈1 min por volume)
+	VOLUMES="$${VOLUMES:-0 1000 10000 100000}" load/run.sh all
 
 load-vegeta:
 	load/run.sh vegeta

@@ -48,6 +48,20 @@ def to_status(status_filter: StatusFilter | None) -> Status | None:
     return Status[status_filter.name] if status_filter else None
 
 
+MAX_PAGE_SIZE = 1000
+
+TOTAL_COUNT = {
+    200: {
+        "description": "Tarefas da página pedida.",
+        "headers": {
+            "X-Total-Count": {
+                "description": "Total de tarefas com o filtro de status, ignorando `limit`/`offset`.",
+                "schema": {"type": "integer", "minimum": 0},
+            }
+        },
+    }
+}
+
 NOT_FOUND = {404: {"model": ErrorResponse, "description": "Nenhuma tarefa com esse id."}}
 
 INVALID_TASK = {
