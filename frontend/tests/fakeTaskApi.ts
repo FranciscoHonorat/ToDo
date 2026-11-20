@@ -1,11 +1,13 @@
-import { ApiError, type StatusFilter, type Task, type TaskApi, type TaskInput } from '../src/api/types'
+import { ApiError, type ListQuery, type Task, type TaskApi, type TaskInput } from '../src/api/types'
 
 /** Implementação em memória de TaskApi — o "MemoryRepository" do frontend. */
 export class FakeTaskApi implements TaskApi {
   tasks: Task[] = []
 
-  async list(status?: StatusFilter) {
-    return this.tasks.filter((task) => !status || task.status === status.toUpperCase())
+  async list({ status, limit, offset = 0 }: ListQuery = {}) {
+    const matching = this.tasks.filter((task) => !status || task.status === status.toUpperCase())
+    const end = limit === undefined ? undefined : offset + limit
+    return { items: matching.slice(offset, end).map((task) => ({ ...task })), total: matching.length }
   }
 
   async create(input: TaskInput) {
@@ -22,6 +24,10 @@ export class FakeTaskApi implements TaskApi {
 
   async complete(id: string) {
     return { ...Object.assign(this.find(id), { status: 'COMPLETED' as const }) }
+  }
+
+  async reopen(id: string) {
+    return { ...Object.assign(this.find(id), { status: 'PENDING' as const }) }
   }
 
   async remove(id: string) {

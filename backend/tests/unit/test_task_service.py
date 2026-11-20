@@ -71,6 +71,23 @@ def test_complete_task_is_persisted_in_repository():
     assert memory.get_task_by_id(task.id).status is Status.COMPLETED
 
 
+def test_reopen_task_is_persisted_in_repository():
+    memory = MemoryRepository()
+    service = TaskService(memory)
+    task = service.create_task("Test Task", "Test Description")
+    service.complete_task(task.id)
+
+    reopened = service.reopen_task(task.id)
+
+    assert reopened.status is Status.PENDING
+    assert memory.get_task_by_id(task.id).status is Status.PENDING
+
+
+def test_reopen_task_with_unknown_id_raises_task_not_found_error():
+    with pytest.raises(TaskNotFoundError):
+        TaskService(MemoryRepository()).reopen_task(uuid.uuid4())
+
+
 def test_list_tasks_filters_by_status():
     memory = MemoryRepository()
     service = TaskService(memory)

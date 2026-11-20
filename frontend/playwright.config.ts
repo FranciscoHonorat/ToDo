@@ -32,7 +32,8 @@ export default defineConfig({
     {
       command: `.venv/bin/python -m uvicorn server:app --port ${API_PORT}`,
       cwd: '../backend',
-      env: { TODO_DATABASE: process.env.E2E_DATABASE },
+      // Sem rate limit: o beforeEach apaga tarefa por tarefa e estouraria o limite.
+      env: { TODO_DATABASE: process.env.E2E_DATABASE, TODO_RATE_LIMIT: 'off' },
       url: `${API_URL}/tasks`,
       reuseExistingServer: false,
     },

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import type { StatusFilter } from '../api/types'
 
-defineProps<{ modelValue: StatusFilter | undefined }>()
+defineProps<{
+  modelValue: StatusFilter | undefined
+  counts?: { all: number; pending: number; completed: number }
+}>()
 const emit = defineEmits<{ 'update:modelValue': [value: StatusFilter | undefined] }>()
 
-const options: { name: string; label: string; value: StatusFilter | undefined }[] = [
+const options: { name: 'all' | StatusFilter; label: string; value: StatusFilter | undefined }[] = [
   { name: 'all', label: 'Todas', value: undefined },
   { name: 'pending', label: 'Pendentes', value: 'pending' },
   { name: 'completed', label: 'Concluídas', value: 'completed' },
@@ -21,6 +24,7 @@ const options: { name: string; label: string; value: StatusFilter | undefined }[
       @click="emit('update:modelValue', option.value)"
     >
       {{ option.label }}
+      <span v-if="counts" class="badge">{{ counts[option.name] }}</span>
     </button>
   </div>
 </template>

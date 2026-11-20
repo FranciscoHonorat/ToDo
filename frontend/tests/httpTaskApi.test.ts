@@ -4,31 +4,37 @@ import { ApiError } from '../src/api/types'
 
 const task = { id: '1', title: 'Comprar pão', description: '', status: 'PENDING' }
 
-function fakeFetch(status: number, body?: unknown) {
+function fakeFetch(status: number, body?: unknown, headers: Record<string, string> = {}) {
   return vi.fn(async () =>
     new Response(body === undefined ? null : JSON.stringify(body), {
       status,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...headers },
     }),
   )
 }
 
 describe('createHttpTaskApi', () => {
-  it('lists tasks with GET /tasks', async () => {
-    const fetch = fakeFetch(200, [task])
+  it('lists tasks with GET /tasks and reads the total from X-Total-Count', async () => {
+    const fetch = fakeFetch(200, [task], { 'X-Total-Count': '7' })
     const api = createHttpTaskApi('/api', fetch)
 
-    expect(await api.list()).toEqual([task])
+    expect(await api.list()).toEqual({ items: [task], total: 7 })
     expect(fetch).toHaveBeenCalledWith('/api/tasks', expect.objectContaining({ method: 'GET' }))
   })
 
-  it('sends the status filter as query string', async () => {
+  it('falls back to the number of items when X-Total-Count is missing', async () => {
+    const api = createHttpTaskApi('/api', fakeFetch(200, [task]))
+
+    expect((await api.list()).total).toBe(1)
+  })
+
+  it('sends status, limit and offset as query string', async () => {
     const fetch = fakeFetch(200, [])
     const api = createHttpTaskApi('/api', fetch)
 
-    await api.list('completed')
+    await api.list({ status: 'completed', limit: 20, offset: 40 })
 
-    expect(fetch).toHaveBeenCalledWith('/api/tasks?status=completed', expect.anything())
+    expect(fetch).toHaveBeenCalledWith('/api/tasks?status=completed&limit=20&offset=40', expect.anything())
   })
 
   it('creates a task with POST and a JSON body', async () => {
@@ -61,6 +67,14 @@ describe('createHttpTaskApi', () => {
     expect(fetch).toHaveBeenCalledWith('/api/tasks/1/complete', expect.objectContaining({ method: 'POST' }))
   })
 
+  it('reopens a task with POST /tasks/:id/reopen', async () => {
+    const fetch = fakeFetch(200, task)
+    const api = createHttpTaskApi('/api', fetch)
+
+    expect((await api.reopen('1')).status).toBe('PENDING')
+    expect(fetch).toHaveBeenCalledWith('/api/tasks/1/reopen', expect.objectContaining({ method: 'POST' }))
+  })
+
   it('removes a task with DELETE and accepts an empty 204 body', async () => {
     const fetch = fakeFetch(204)
     const api = createHttpTaskApi('/api', fetch)
@@ -83,5 +97,15 @@ describe('createHttpTaskApi', () => {
     const api = createHttpTaskApi('/api', fakeFetch(422, { detail: [{ msg: 'x' }] }))
 
     await expect(api.list()).rejects.toThrow('Requisição inválida (422).')
+  })
+
+  it('a non-JSON error body (e.g. 502 from the proxy) still becomes an ApiError', async () => {
+    const fetch = vi.fn(async () => new Response('<html>Bad Gateway</html>', { status: 502 }))
+    const api = createHttpTaskApi('/api', fetch)
+
+    const error = await api.list().catch((e) => e)
+
+    expect(error).toBeInstanceOf(ApiError)
+    expect(error.status).toBe(502)
   })
 })

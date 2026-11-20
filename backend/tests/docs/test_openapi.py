@@ -14,6 +14,7 @@ TASK_ID_OPERATIONS = [
     ("put", "/tasks/{task_id}"),
     ("delete", "/tasks/{task_id}"),
     ("post", "/tasks/{task_id}/complete"),
+    ("post", "/tasks/{task_id}/reopen"),
 ]
 
 
@@ -97,5 +98,16 @@ def test_operation_ids_are_the_handler_names(spec):
         "get_task",
         "edit_task",
         "complete_task",
+        "reopen_task",
         "delete_task",
     }
+
+
+def test_every_task_operation_documents_429_with_retry_after(spec):
+    for path, operations in spec["paths"].items():
+        if not path.startswith("/tasks"):
+            continue
+        for method, operation in operations.items():
+            response = operation["responses"]["429"]
+            assert schema_ref(response) == ["#/components/schemas/ErrorResponse"], f"{method} {path}"
+            assert "Retry-After" in response["headers"], f"{method} {path}"

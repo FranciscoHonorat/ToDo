@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.app import create_app
+from api.rate_limit import RateLimit
 from application.task_service import TaskService
 from persistence.memory_repository import MemoryRepository
 
@@ -109,6 +110,20 @@ def test_complete_task_returns_completed_task(client):
     assert response.json()["status"] == "COMPLETED"
 
 
+def test_reopen_task_returns_pending_task(client):
+    created = create(client).json()
+    client.post(f"/tasks/{created['id']}/complete")
+
+    response = client.post(f"/tasks/{created['id']}/reopen")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "PENDING"
+
+
+def test_reopen_unknown_task_returns_404(client):
+    assert client.post(f"/tasks/{uuid.uuid4()}/reopen").status_code == 404
+
+
 def test_edit_task_returns_edited_task(client):
     created = create(client).json()
 
@@ -152,3 +167,40 @@ def test_health_returns_ok(client):
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+@pytest.fixture
+def limited_client():
+    return TestClient(create_app(TaskService(MemoryRepository()), rate_limit=RateLimit(2, 60)))
+
+
+def test_requests_over_the_limit_get_429_with_retry_after(limited_client):
+    limited_client.get("/tasks")
+    limited_client.get("/tasks")
+
+    response = limited_client.get("/tasks")
+
+    assert response.status_code == 429
+    assert response.headers["Retry-After"] == "30"
+    assert response.json() == {"detail": "Too many requests. Try again in 30 seconds."}
+
+
+def test_limited_responses_report_limit_and_remaining(limited_client):
+    response = limited_client.get("/tasks")
+
+    assert response.headers["X-RateLimit-Limit"] == "2"
+    assert response.headers["X-RateLimit-Remaining"] == "1"
+
+
+def test_health_is_never_rate_limited(limited_client):
+    for _ in range(5):
+        assert limited_client.get("/health").status_code == 200
+    assert limited_client.get("/tasks").status_code == 200
+
+
+def test_rate_limit_is_off_by_default(client):
+    for _ in range(50):
+        response = client.get("/tasks")
+
+    assert response.status_code == 200
+    assert "X-RateLimit-Limit" not in response.headers

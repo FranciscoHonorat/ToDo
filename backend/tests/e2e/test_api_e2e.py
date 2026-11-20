@@ -31,6 +31,9 @@ def test_full_task_journey(server):
     assert call(server, "GET", "/tasks?status=completed")[1] == [completed]
     assert call(server, "GET", "/tasks?status=pending")[1] == []
 
+    status, reopened = call(server, "POST", f"{task}/reopen")
+    assert (status, reopened["status"]) == (200, "PENDING")
+
     assert call(server, "DELETE", task) == (204, None)
     assert call(server, "GET", task)[0] == 404
 
@@ -46,6 +49,7 @@ def test_full_task_journey(server):
         ("GET", f"/tasks/{uuid.uuid4()}", None, None, 404),
         ("PUT", f"/tasks/{uuid.uuid4()}", {"title": "x"}, None, 404),
         ("POST", f"/tasks/{uuid.uuid4()}/complete", None, None, 404),
+        ("POST", f"/tasks/{uuid.uuid4()}/reopen", None, None, 404),
         ("DELETE", f"/tasks/{uuid.uuid4()}", None, None, 404),
     ],
 )
@@ -74,3 +78,12 @@ def test_concurrent_requests_do_not_lose_tasks(server):
 
     assert statuses == [201] * len(titles)
     assert sorted(t["title"] for t in call(server, "GET", "/tasks")[1]) == sorted(titles)
+
+
+def test_real_server_enforces_the_configured_rate_limit(make_server):
+    server = make_server(rate_limit="3/minute")
+
+    statuses = [call(server, "GET", "/tasks")[0] for _ in range(4)]
+
+    assert statuses == [200, 200, 200, 429]
+    assert call(server, "GET", "/health")[0] == 200

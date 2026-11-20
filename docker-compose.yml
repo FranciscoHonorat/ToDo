@@ -4,6 +4,7 @@ services:
     image: todo-backend:local
     environment:
       API_ROOT_PATH: /api
+      TODO_RATE_LIMIT: ${TODO_RATE_LIMIT:-300/minute}   # "off" desliga (ex.: teste de carga)
     volumes:
       - todo-data:/data
     restart: unless-stopped

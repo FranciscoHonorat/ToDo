@@ -7,6 +7,7 @@ from api.schemas import (
     INVALID_TASK,
     MAX_PAGE_SIZE,
     NOT_FOUND,
+    TOO_MANY_REQUESTS,
     TOTAL_COUNT,
     HealthOutput,
     StatusFilter,
@@ -14,6 +15,7 @@ from api.schemas import (
     TaskOutput,
     to_status,
 )
+from api.rate_limit import RateLimit, TokenBucketLimiter, add_rate_limiting
 from application.task_service import TaskService
 from domain.exceptions import InvalidTitleError, TaskNotFoundError
 
@@ -27,6 +29,9 @@ DESCRIPTION = """API de tarefas do projeto ToDo.
 Erros de regra de negócio retornam `{"detail": "<mensagem>"}`; erros de formato
 (JSON inválido, UUID malformado, status desconhecido) seguem o padrão do FastAPI,
 com `detail` sendo uma lista.
+
+As rotas de `/tasks` têm limite de requisições por cliente (IP). Acima dele a resposta é
+`429` com `Retry-After`; toda resposta limitada traz `X-RateLimit-Limit` e `X-RateLimit-Remaining`.
 """
 
 TAGS = [
@@ -35,7 +40,7 @@ TAGS = [
 ]
 
 
-def create_app(service: TaskService, root_path: str = "") -> FastAPI:
+def create_app(service: TaskService, root_path: str = "", rate_limit: RateLimit | None = None) -> FastAPI:
     app = FastAPI(
         title="ToDo API",
         version="0.1.0",
@@ -48,6 +53,9 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
     for error, code in ERROR_STATUS.items():
         app.add_exception_handler(error, _error_handler(code))
 
+    if rate_limit:
+        add_rate_limiting(app, TokenBucketLimiter(rate_limit))
+
     @app.get("/health", tags=["infra"], response_model=HealthOutput, summary="Healthcheck")
     def health():
         """Usado pelos healthchecks do Docker e pelas probes do Kubernetes."""
@@ -57,7 +65,7 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         "/tasks",
         tags=["tasks"],
         response_model=list[TaskOutput],
-        responses=TOTAL_COUNT,
+        responses={**TOTAL_COUNT, **TOO_MANY_REQUESTS},
         summary="Lista tarefas",
     )
     def list_tasks(
@@ -78,7 +86,7 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         tags=["tasks"],
         response_model=TaskOutput,
         status_code=status.HTTP_201_CREATED,
-        responses=INVALID_TASK,
+        responses={**INVALID_TASK, **TOO_MANY_REQUESTS},
         summary="Cria uma tarefa",
     )
     def create_task(body: TaskInput):
@@ -89,7 +97,7 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         "/tasks/{task_id}",
         tags=["tasks"],
         response_model=TaskOutput,
-        responses=NOT_FOUND,
+        responses={**NOT_FOUND, **TOO_MANY_REQUESTS},
         summary="Busca uma tarefa",
     )
     def get_task(task_id: uuid.UUID):
@@ -100,7 +108,7 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         "/tasks/{task_id}",
         tags=["tasks"],
         response_model=TaskOutput,
-        responses={**NOT_FOUND, **INVALID_TASK},
+        responses={**NOT_FOUND, **INVALID_TASK, **TOO_MANY_REQUESTS},
         summary="Edita uma tarefa",
     )
     def edit_task(task_id: uuid.UUID, body: TaskInput):
@@ -111,19 +119,30 @@ def create_app(service: TaskService, root_path: str = "") -> FastAPI:
         "/tasks/{task_id}/complete",
         tags=["tasks"],
         response_model=TaskOutput,
-        responses=NOT_FOUND,
+        responses={**NOT_FOUND, **TOO_MANY_REQUESTS},
         summary="Conclui uma tarefa",
     )
     def complete_task(task_id: uuid.UUID):
         """Muda o status para `COMPLETED`. Concluir uma tarefa já concluída não é erro."""
         return service.complete_task(task_id)
 
+    @app.post(
+        "/tasks/{task_id}/reopen",
+        tags=["tasks"],
+        response_model=TaskOutput,
+        responses={**NOT_FOUND, **TOO_MANY_REQUESTS},
+        summary="Reabre uma tarefa",
+    )
+    def reopen_task(task_id: uuid.UUID):
+        """Volta o status para `PENDING`. Reabrir uma tarefa pendente não é erro."""
+        return service.reopen_task(task_id)
+
     @app.delete(
         "/tasks/{task_id}",
         tags=["tasks"],
         status_code=status.HTTP_204_NO_CONTENT,
         response_class=Response,
-        responses=NOT_FOUND,
+        responses={**NOT_FOUND, **TOO_MANY_REQUESTS},
         summary="Remove uma tarefa",
     )
     def delete_task(task_id: uuid.UUID):

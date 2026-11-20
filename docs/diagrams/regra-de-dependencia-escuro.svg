@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="500" viewBox="40 20 820 500">
+<title>Regra de dependência do ToDo</title>
+<rect id="fundo" x="40" y="20" width="820" height="500" fill="#161d25"/>
+<g id="api_ou_ui">
+<rect x="60" y="40" width="400" height="74" rx="6" fill="#12302b" stroke="#6fd0bd" stroke-width="1.4"/>
+<text x="260.0" y="72" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#e4e9ef" text-anchor="middle">api | ui</text>
+<text x="260.0" y="94" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#98a3b0" text-anchor="middle">FastAPI · CLI · traduz HTTP/terminal</text>
+</g>
+<g id="application">
+<rect x="60" y="180" width="400" height="74" rx="6" fill="#1c2142" stroke="#9ea9f5" stroke-width="1.4"/>
+<text x="260.0" y="212" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#e4e9ef" text-anchor="middle">application</text>
+<text x="260.0" y="234" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#98a3b0" text-anchor="middle">TaskService · TaskDTO · casos de uso</text>
+</g>
+<g id="domain">
+<rect x="60" y="320" width="400" height="74" rx="6" fill="#33270f" stroke="#f0b85a" stroke-width="2.2"/>
+<text x="260.0" y="352" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#e4e9ef" text-anchor="middle">domain</text>
+<text x="260.0" y="374" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#98a3b0" text-anchor="middle">Task · Status · porta TaskRepository</text>
+</g>
+<g id="composition_root">
+<rect x="560" y="40" width="280" height="74" rx="6" fill="#20272f" stroke="#a7b2bf" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="700.0" y="72" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#e4e9ef" text-anchor="middle">composition root</text>
+<text x="700.0" y="94" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#98a3b0" text-anchor="middle">monta tudo na inicialização</text>
+</g>
+<g id="persistence">
+<rect x="560" y="320" width="280" height="74" rx="6" fill="#20272f" stroke="#a7b2bf" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="700.0" y="352" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#e4e9ef" text-anchor="middle">persistence</text>
+<text x="700.0" y="374" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#98a3b0" text-anchor="middle">SqliteRepository · MemoryRepository</text>
+</g>
+<g id="fastapi__pydantic__sqlite3">
+<rect x="560" y="450" width="280" height="54" rx="6" fill="#161d25" stroke="#3a4552" stroke-width="1.4"/>
+<text x="700.0" y="482.0" font-family="IBM Plex Mono" font-size="13" font-weight="500" fill="#98a3b0" text-anchor="middle">fastapi · pydantic · sqlite3</text>
+</g>
+<g id="api_para_application">
+<path d="M260 114 L260 180" fill="none" stroke="#e4e9ef" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M255.0 169.0 L260 180 L265.0 169.0" fill="none" stroke="#e4e9ef" stroke-width="1.3"/>
+</g>
+<g id="application_para_domain">
+<path d="M260 254 L260 320" fill="none" stroke="#e4e9ef" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M255.0 309.0 L260 320 L265.0 309.0" fill="none" stroke="#e4e9ef" stroke-width="1.3"/>
+</g>
+<g id="persistence_implementa_domain">
+<path d="M560 357 L460 357" fill="none" stroke="#e4e9ef" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M474.0 350.0 L460 357 L474.0 364.0 Z" fill="#1b232d" stroke="#e4e9ef" stroke-width="1.3"/>
+<text x="510" y="347" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#98a3b0" text-anchor="middle">implementa</text>
+</g>
+<g id="composition_cria_persistence">
+<path d="M700 114 L700 320" fill="none" stroke="#e4e9ef" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M695.0 309.0 L700 320 L705.0 309.0" fill="none" stroke="#e4e9ef" stroke-width="1.3"/>
+<text x="710" y="220" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#98a3b0" text-anchor="start">cria</text>
+</g>
+<g id="composition_injeta">
+<path d="M560 77 L460 77" fill="none" stroke="#e4e9ef" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M471.0 72.0 L460 77 L471.0 82.0" fill="none" stroke="#e4e9ef" stroke-width="1.3"/>
+<text x="510" y="67" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#98a3b0" text-anchor="middle">injeta</text>
+</g>
+<g id="persistence_usa_sqlite">
+<path d="M640 394 L640 450" fill="none" stroke="#e4e9ef" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M635.0 439.0 L640 450 L645.0 439.0" fill="none" stroke="#e4e9ef" stroke-width="1.3"/>
+<text x="648" y="428" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#98a3b0" text-anchor="start">usa</text>
+</g>
+<g id="proibido_domain_frameworks">
+<path d="M260 394 L260 477 L560 477" fill="none" stroke="#f2695c" stroke-width="1.6" stroke-dasharray="3 4"/>
+<text x="270" y="440" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#f2695c" text-anchor="start">domain → frameworks: o CI quebra</text>
+</g>
+<g id="proibido"><circle cx="410" cy="477" r="11" fill="#161d25" stroke="#f2695c" stroke-width="1.6"/><path d="M405 472 L415 482 M415 472 L405 482" stroke="#f2695c" stroke-width="2"/></g>
+<g id="proibido_application_persistence">
+<path d="M460 217 L600 217 L600 320" fill="none" stroke="#f2695c" stroke-width="1.6" stroke-dasharray="3 4"/>
+<text x="590" y="290" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#f2695c" text-anchor="end">application → persistence</text>
+</g>
+<g id="proibido"><circle cx="600" cy="255" r="11" fill="#161d25" stroke="#f2695c" stroke-width="1.6"/><path d="M595 250 L605 260 M605 250 L595 260" stroke="#f2695c" stroke-width="2"/></g>
+</svg>

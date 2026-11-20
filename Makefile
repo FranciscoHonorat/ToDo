@@ -3,12 +3,15 @@ CHART := infra/helm/todo
 KIND_CLUSTER := todo
 
 .PHONY: install lint lint-backend lint-frontend lint-infra format \
-        test test-backend test-frontend test-arch test-e2e openapi load load-volumes load-vegeta load-locust load-ui api web cli \
+        test test-backend test-frontend test-arch test-e2e test-sdks openapi sdks sdk-typescript sdk-python sdk-go sdks-check load load-volumes load-vegeta load-locust load-ui api web cli \
         up down k8s-up k8s-down
 
 install:
 	cd backend && poetry install --with load
 	cd frontend && npm install && npx playwright install chromium
+	cd sdks/typescript && npm install
+	cd sdks/python && poetry install
+	cd sdks/go && go mod download
 
 ## Lint e formatação ------------------------------------------------------
 lint: lint-backend lint-frontend lint-infra   # só verifica, não altera nada (igual ao CI)
@@ -28,7 +31,7 @@ format:                  # reescreve os arquivos: black no backend, tofu fmt na 
 	tofu fmt -recursive infra/tofu
 
 ## Testes ---------------------------------------------------------------
-test: test-backend test-frontend test-e2e
+test: test-backend test-frontend test-e2e test-sdks
 
 test-backend:            # unit + integração + arquitetura + docs (sem E2E)
 	cd backend && $(PY) -m pytest -m "not e2e"
@@ -44,9 +47,29 @@ test-e2e:                # backend: uvicorn real + contrato OpenAPI; frontend: P
 	cd backend && $(PY) -m pytest -m e2e
 	cd frontend && npx playwright test
 
-## Documentação -----------------------------------------------------------
+test-sdks:               # as 3 SDKs: unit + contra a API real (uvicorn do backend/.venv)
+	cd sdks/typescript && npx tsc --noEmit && npx vitest run
+	cd sdks/python && .venv/bin/python -m pytest -q
+	cd sdks/go && go vet ./... && go test ./...
+
+## Documentação e SDKs ----------------------------------------------------
 openapi:                 # regenera docs/openapi.yaml a partir do código
 	cd backend && $(PY) export_openapi.py
+
+sdks: openapi sdk-typescript sdk-python sdk-go   # regenera spec + código gerado das 3 SDKs
+
+sdk-typescript:
+	cd sdks/typescript && npm run generate
+
+sdk-python:
+	cd sdks/python && .venv/bin/openapi-python-client generate --path ../../docs/openapi.yaml \
+		--config openapi-python-client.yaml --meta none --output-path todo_api_client/generated --overwrite
+
+sdk-go:
+	cd sdks/go/todo && go generate ./...
+
+sdks-check: sdk-typescript sdk-python sdk-go     # falha se o código gerado versionado estiver desatualizado
+	git diff --exit-code -- sdks/
 
 ## Carga -----------------------------------------------------------------
 # Sobe um servidor próprio com banco temporário (ou use TARGET=http://...).

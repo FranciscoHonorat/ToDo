@@ -81,11 +81,40 @@ describe('TaskForm', () => {
     const { wrapper } = mountForm({ submit: vi.fn(() => new Promise<boolean>((resolve) => (finish = resolve))) })
     const button = wrapper.get('button[type="submit"]')
 
+    await wrapper.get('[data-test="title"]').setValue('Comprar pão')
     await wrapper.get('form').trigger('submit')
     expect(button.attributes('disabled')).toBeDefined()
 
     finish(true)
     await flushPromises()
     expect(button.attributes('disabled')).toBeUndefined()
+  })
+
+  it('Escape cancels when cancellable', async () => {
+    const { wrapper } = mountForm({ cancellable: true })
+
+    await wrapper.get('form').trigger('keydown', { key: 'Escape' })
+
+    expect(wrapper.emitted('cancel')).toHaveLength(1)
+  })
+
+  it('a blank title is caught on the field and nothing is sent', async () => {
+    const { wrapper, submit } = mountForm()
+
+    await wrapper.get('[data-test="title"]').setValue('   ')
+    await wrapper.get('form').trigger('submit')
+
+    expect(submit).not.toHaveBeenCalled()
+    expect(wrapper.get('[data-test="title-error"]').text()).toBe('Dê um título para a tarefa.')
+    expect(wrapper.get('[data-test="title"]').attributes('aria-invalid')).toBe('true')
+  })
+
+  it('typing clears the field error', async () => {
+    const { wrapper } = mountForm()
+    await wrapper.get('form').trigger('submit')
+
+    await wrapper.get('[data-test="title"]').setValue('Agora sim')
+
+    expect(wrapper.find('[data-test="title-error"]').exists()).toBe(false)
   })
 })

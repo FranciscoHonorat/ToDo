@@ -15,6 +15,8 @@
 #                        Ex.: TARGET=http://localhost:8080/api (compose). CUIDADO: grava dados lá,
 #                        os cenários compartilham o banco, e o volume só é semeado via API
 #                        (tarefas pendentes, uma requisição por tarefa, só no cenário read).
+#                        O alvo precisa estar sem rate limit, senão a carga mede 429s:
+#                        TODO_RATE_LIMIT=off docker compose up -d. (O servidor próprio já sobe com off.)
 #   RATE=100             Vegeta: requisições por segundo.
 #   DURATION=15s         Duração de cada ataque/execução.
 #   USERS=50             Locust: usuários simultâneos.
@@ -72,7 +74,7 @@ start_server() {
   port="$("$PY" -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])')"
   TARGET="http://127.0.0.1:$port"
   echo "→ [$name] uvicorn em $TARGET, banco novo com $VOLUME tarefas ($PENDING_PCT% pendentes)"
-  (cd "$ROOT/backend" && TODO_DATABASE="$db" exec "$PY" -m uvicorn server:app \
+  (cd "$ROOT/backend" && TODO_DATABASE="$db" TODO_RATE_LIMIT=off exec "$PY" -m uvicorn server:app \
       --port "$port" --no-access-log --log-level warning) &
   SERVER_PID=$!
   for _ in $(seq 50); do curl -sf "$TARGET/health" >/dev/null && return; sleep 0.2; done

@@ -1,0 +1,8 @@
+# Configuração do gerador (make sdk-go). Gera todo/client.gen.go (caminho relativo a todo/, onde roda o go:generate) a partir de docs/openapi.yaml.
+package: todo
+output: client.gen.go
+generate:
+  models: true
+  client: true
+output-options:
+  skip-prune: true
