@@ -13,8 +13,9 @@ install:
 ## Lint e formatação ------------------------------------------------------
 lint: lint-backend lint-frontend lint-infra   # só verifica, não altera nada (igual ao CI)
 
-lint-backend:            # estilo (flake8), formatação (black) e camadas (import-linter)
-	cd backend && $(PY) -m flake8 . && $(PY) -m black --check . && .venv/bin/lint-imports
+lint-backend:            # estilo (flake8), formatação (black), camadas (import-linter) e segurança (bandit)
+	cd backend && $(PY) -m flake8 . && $(PY) -m black --check . && .venv/bin/lint-imports \
+		&& $(PY) -m bandit -q -c pyproject.toml -r .
 
 lint-frontend:           # type-check
 	cd frontend && npx vue-tsc --noEmit
