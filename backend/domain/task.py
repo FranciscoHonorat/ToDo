@@ -20,6 +20,9 @@ class Task:
     def complete(self):
         self.status = Status.COMPLETED
 
+    def reopen(self):
+        self.status = Status.PENDING
+
     def edit(self, title, description):
         self._validate_title(title)
         self.title = title

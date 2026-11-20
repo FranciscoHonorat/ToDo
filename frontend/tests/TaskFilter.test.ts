@@ -21,4 +21,14 @@ describe('TaskFilter', () => {
 
     expect(wrapper.emitted('update:modelValue')).toEqual([[value]])
   })
+
+  it('shows a count next to each option when counts are given', () => {
+    const wrapper = mount(TaskFilter, {
+      props: { modelValue: undefined, counts: { all: 7, pending: 4, completed: 3 } },
+    })
+
+    expect(wrapper.get('[data-test="filter-all"]').text()).toBe('Todas 7')
+    expect(wrapper.get('[data-test="filter-pending"]').text()).toBe('Pendentes 4')
+    expect(wrapper.get('[data-test="filter-completed"]').text()).toBe('Concluídas 3')
+  })
 })

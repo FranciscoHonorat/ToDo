@@ -62,6 +62,27 @@ TOTAL_COUNT = {
     }
 }
 
+TOO_MANY_REQUESTS = {
+    429: {
+        "model": ErrorResponse,
+        "description": "Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).",
+        "headers": {
+            "Retry-After": {
+                "description": "Segundos até poder tentar de novo.",
+                "schema": {"type": "integer", "minimum": 0},
+            },
+            "X-RateLimit-Limit": {
+                "description": "Requisições permitidas por período.",
+                "schema": {"type": "integer", "minimum": 1},
+            },
+            "X-RateLimit-Remaining": {
+                "description": "Requisições restantes agora (0 quando bloqueado).",
+                "schema": {"type": "integer", "minimum": 0},
+            },
+        },
+    }
+}
+
 NOT_FOUND = {404: {"model": ErrorResponse, "description": "Nenhuma tarefa com esse id."}}
 
 INVALID_TASK = {

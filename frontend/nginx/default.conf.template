@@ -6,7 +6,9 @@ server {
     location /api/ {
         proxy_pass ${API_URL}/;
         proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Sobrescreve (não anexa): o nginx é a borda, então um X-Forwarded-For vindo do cliente
+        # seria forjado — e o rate limit do backend conta requisições por esse IP.
+        proxy_set_header X-Forwarded-For $remote_addr;
     }
 
     location = /health {

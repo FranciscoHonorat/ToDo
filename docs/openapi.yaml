@@ -8,6 +8,9 @@ info:
     Erros de regra de negócio retornam `{"detail": "<mensagem>"}`; erros de formato
     (JSON inválido, UUID malformado, status desconhecido) seguem o padrão do FastAPI,
     com `detail` sendo uma lista.
+
+    As rotas de `/tasks` têm limite de requisições por cliente (IP). Acima dele a resposta é
+    `429` com `Retry-After`; toda resposta limitada traz `X-RateLimit-Limit` e `X-RateLimit-Remaining`.
   version: 0.1.0
 paths:
   /health:
@@ -80,6 +83,28 @@ paths:
               schema:
                 type: integer
                 minimum: 0
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: Validation Error
           content:
@@ -114,6 +139,28 @@ paths:
                 anyOf:
                 - $ref: '#/components/schemas/ErrorResponse'
                 - $ref: '#/components/schemas/HTTPValidationError'
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /tasks/{task_id}:
     get:
       tags:
@@ -138,6 +185,28 @@ paths:
                 $ref: '#/components/schemas/TaskOutput'
         '404':
           description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
           content:
             application/json:
               schema:
@@ -190,6 +259,28 @@ paths:
                 anyOf:
                 - $ref: '#/components/schemas/ErrorResponse'
                 - $ref: '#/components/schemas/HTTPValidationError'
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
       - tasks
@@ -209,6 +300,28 @@ paths:
           description: Successful Response
         '404':
           description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
           content:
             application/json:
               schema:
@@ -244,6 +357,85 @@ paths:
                 $ref: '#/components/schemas/TaskOutput'
         '404':
           description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /tasks/{task_id}/reopen:
+    post:
+      tags:
+      - tasks
+      summary: Reabre uma tarefa
+      description: Volta o status para `PENDING`. Reabrir uma tarefa pendente não
+        é erro.
+      operationId: reopen_task
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Task Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskOutput'
+        '404':
+          description: Nenhuma tarefa com esse id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Limite de requisições por cliente excedido (ver `TODO_RATE_LIMIT`).
+          headers:
+            Retry-After:
+              description: Segundos até poder tentar de novo.
+              schema:
+                type: integer
+                minimum: 0
+            X-RateLimit-Limit:
+              description: Requisições permitidas por período.
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              description: Requisições restantes agora (0 quando bloqueado).
+              schema:
+                type: integer
+                minimum: 0
           content:
             application/json:
               schema:

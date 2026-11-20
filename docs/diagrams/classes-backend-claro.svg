@@ -1,0 +1,232 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="950" viewBox="10 20 1220 950">
+<title>Diagrama de classes do backend do ToDo</title>
+<rect id="fundo" x="10" y="20" width="1220" height="950" fill="#ffffff"/>
+<g id="faixa_api"><rect x="20" y="30" width="860" height="280" rx="6" fill="#e3f1ee"/><text x="34" y="52" font-family="IBM Plex Sans" font-size="13" font-weight="600" fill="#1f6f62" text-anchor="start">api | ui · adaptadores de entrada</text><text x="866" y="52" font-family="IBM Plex Mono" font-size="11.5" font-weight="400" fill="#1f6f62" text-anchor="end">independentes entre si · sem persistence</text></g>
+<g id="faixa_application"><rect x="20" y="330" width="860" height="260" rx="6" fill="#e8ebfb"/><text x="34" y="352" font-family="IBM Plex Sans" font-size="13" font-weight="600" fill="#3c4bb0" text-anchor="start">application · casos de uso</text><text x="866" y="352" font-family="IBM Plex Mono" font-size="11.5" font-weight="400" fill="#3c4bb0" text-anchor="end">não importa persistence, fastapi, pydantic, sqlite3</text></g>
+<g id="faixa_domain"><rect x="20" y="610" width="860" height="350" rx="6" fill="#fbf0dc"/><text x="34" y="632" font-family="IBM Plex Sans" font-size="13" font-weight="600" fill="#9a5b00" text-anchor="start">domain · regras de negócio</text><text x="866" y="632" font-family="IBM Plex Mono" font-size="11.5" font-weight="400" fill="#9a5b00" text-anchor="end">puro: nenhum framework, nenhuma outra camada</text></g>
+<g id="faixa_composition"><rect x="890" y="30" width="330" height="280" rx="6" fill="#eceff2" stroke="#c9d1da" stroke-dasharray="5 4"/><text x="904" y="52" font-family="IBM Plex Sans" font-size="13" font-weight="600" fill="#4d5866" text-anchor="start">composition root</text><text x="1206" y="52" font-family="IBM Plex Mono" font-size="11.5" font-weight="400" fill="#4d5866" text-anchor="end">o único que conhece tudo</text></g>
+<g id="faixa_persistence"><rect x="890" y="610" width="330" height="350" rx="6" fill="#eceff2" stroke="#c9d1da" stroke-dasharray="5 4"/><text x="904" y="632" font-family="IBM Plex Sans" font-size="13" font-weight="600" fill="#4d5866" text-anchor="start">persistence</text><text x="1206" y="632" font-family="IBM Plex Mono" font-size="11.5" font-weight="400" fill="#4d5866" text-anchor="end">implementa a porta do domain</text></g>
+<g id="pacote_api"><path d="M40 62 h70 v18 h350 v212 h-420 Z" fill="none" stroke="#5b6673"/><line x1="40" y1="80" x2="110" y2="80" stroke="#5b6673"/><text x="48" y="75" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#5b6673" text-anchor="start">api</text></g>
+<g id="api.app">
+<rect x="55" y="95" width="230" height="175" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="170.0" y="114" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«module»</text>
+<text x="170.0" y="130" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">api.app</text>
+<line x1="55" y1="141" x2="285" y2="141" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="63" y="156" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">create_app(service): FastAPI</text>
+<text x="63" y="173" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">GET    /tasks</text>
+<text x="63" y="190" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">POST   /tasks</text>
+<text x="63" y="207" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">GET    /tasks/{id}</text>
+<text x="63" y="224" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">PUT    /tasks/{id}</text>
+<text x="63" y="241" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">POST   /tasks/{id}/complete</text>
+<text x="63" y="258" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">DELETE /tasks/{id}</text>
+</g>
+<g id="api.schemas">
+<rect x="300" y="95" width="148" height="124" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="374.0" y="114" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«pydantic»</text>
+<text x="374.0" y="130" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">api.schemas</text>
+<line x1="300" y1="141" x2="448" y2="141" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="308" y="156" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">TaskInput</text>
+<text x="308" y="173" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">TaskOutput</text>
+<text x="308" y="190" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">ErrorResponse</text>
+<text x="308" y="207" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">to_status(filter)</text>
+</g>
+<g id="pacote_ui"><path d="M475 62 h70 v18 h320 v212 h-390 Z" fill="none" stroke="#5b6673"/><line x1="475" y1="80" x2="545" y2="80" stroke="#5b6673"/><text x="483" y="75" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#5b6673" text-anchor="start">ui</text></g>
+<g id="ui.cli">
+<rect x="490" y="95" width="180" height="90" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="580.0" y="114" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«module»</text>
+<text x="580.0" y="130" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">ui.cli</text>
+<line x1="490" y1="141" x2="670" y2="141" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="498" y="156" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">build_parser()</text>
+<text x="498" y="173" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">run(service, argv): int</text>
+</g>
+<g id="ui.formt">
+<rect x="683" y="95" width="172" height="90" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="769.0" y="114" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«module»</text>
+<text x="769.0" y="130" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">ui.formt</text>
+<line x1="683" y1="141" x2="855" y2="141" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="691" y="156" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">format_task(dto)</text>
+<text x="691" y="173" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">format_task_list(dtos)</text>
+</g>
+<g id="TaskService">
+<rect x="50" y="370" width="330" height="186" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="215.0" y="389" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">TaskService</text>
+<line x1="50" y1="400" x2="380" y2="400" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="58" y="415" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">- repository: TaskRepository</text>
+<line x1="50" y1="427" x2="380" y2="427" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="58" y="442" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ create_task(title, description): Task</text>
+<text x="58" y="459" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ list_tasks(status): list[Task]</text>
+<text x="58" y="476" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ list_page(status, limit, offset): TaskPage</text>
+<text x="58" y="493" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ get_task_by_id(id): Task</text>
+<text x="58" y="510" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ complete_task(id): Task</text>
+<text x="58" y="527" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ edit_task(id, title, description): Task</text>
+<text x="58" y="544" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ delete_task(id)</text>
+</g>
+<g id="TaskPage">
+<rect x="420" y="370" width="190" height="90" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="515.0" y="389" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«dataclass, frozen»</text>
+<text x="515.0" y="405" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">TaskPage</text>
+<line x1="420" y1="416" x2="610" y2="416" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="428" y="431" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ items: list[Task]</text>
+<text x="428" y="448" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ total: int</text>
+</g>
+<g id="TaskDTO">
+<rect x="650" y="370" width="210" height="151" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="755.0" y="389" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«dataclass, frozen»</text>
+<text x="755.0" y="405" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">TaskDTO</text>
+<line x1="650" y1="416" x2="860" y2="416" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="658" y="431" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ id: str</text>
+<text x="658" y="448" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ title: str</text>
+<text x="658" y="465" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ description: str</text>
+<text x="658" y="482" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ status: str</text>
+<line x1="650" y1="494" x2="860" y2="494" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="658" y="509" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start" text-decoration="underline">+ from_task(task): TaskDTO</text>
+</g>
+<g id="Task">
+<rect x="50" y="655" width="230" height="169" rx="3" fill="#ffffff" stroke="#9a5b00" stroke-width="2"/>
+<text x="165.0" y="674" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">Task</text>
+<line x1="50" y1="685" x2="280" y2="685" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="58" y="700" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ id: UUID</text>
+<text x="58" y="717" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ title: str</text>
+<text x="58" y="734" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ description: str</text>
+<text x="58" y="751" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ status: Status</text>
+<line x1="50" y1="763" x2="280" y2="763" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="58" y="778" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ complete()</text>
+<text x="58" y="795" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ edit(title, description)</text>
+<text x="58" y="812" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start" text-decoration="underline">- _validate_title(title)</text>
+</g>
+<g id="Status">
+<rect x="320" y="655" width="150" height="90" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="395.0" y="674" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«enum»</text>
+<text x="395.0" y="690" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">Status</text>
+<line x1="320" y1="701" x2="470" y2="701" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="328" y="716" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">PENDING</text>
+<text x="328" y="733" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">COMPLETED</text>
+</g>
+<g id="InvalidTitleError">
+<rect x="320" y="775" width="180" height="46" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="410.0" y="794" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«exception»</text>
+<text x="410.0" y="810" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">InvalidTitleError</text>
+</g>
+<g id="TaskNotFoundError">
+<rect x="320" y="840" width="180" height="46" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="410.0" y="859" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«exception»</text>
+<text x="410.0" y="875" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">TaskNotFoundError</text>
+</g>
+<g id="TaskRepository">
+<rect x="520" y="655" width="340" height="175" rx="3" fill="#ffffff" stroke="#9a5b00" stroke-width="2"/>
+<text x="690.0" y="674" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«Protocol · porta»</text>
+<text x="690.0" y="690" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">TaskRepository</text>
+<line x1="520" y1="701" x2="860" y2="701" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="528" y="716" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ add_task(task)</text>
+<text x="528" y="733" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ get_all_tasks(): list[Task]</text>
+<text x="528" y="750" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ find_tasks(status, limit, offset): list[Task]</text>
+<text x="528" y="767" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ count_tasks(status): int</text>
+<text x="528" y="784" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ get_task_by_id(id): Task | None</text>
+<text x="528" y="801" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ update_task(task)</text>
+<text x="528" y="818" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ delete_task(id)</text>
+</g>
+<g id="main.py__server.py">
+<rect x="905" y="72" width="300" height="90" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="1055.0" y="91" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«entry point»</text>
+<text x="1055.0" y="107" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">main.py · server.py</text>
+<line x1="905" y1="118" x2="1205" y2="118" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="913" y="133" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">main → ui.cli.run(service)</text>
+<text x="913" y="150" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">server → api.create_app(service)</text>
+</g>
+<g id="composition">
+<rect x="905" y="182" width="300" height="90" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="1055.0" y="201" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle" font-style="italic">«module»</text>
+<text x="1055.0" y="217" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">composition</text>
+<line x1="905" y1="228" x2="1205" y2="228" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="913" y="243" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">build_service(connection): TaskService</text>
+<text x="913" y="260" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">database_path(): str</text>
+</g>
+<g id="SqliteRepository">
+<rect x="905" y="655" width="300" height="135" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="1055.0" y="674" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">SqliteRepository</text>
+<line x1="905" y1="685" x2="1205" y2="685" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="913" y="700" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">- connection: sqlite3.Connection</text>
+<text x="913" y="717" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">- _lock: threading.Lock</text>
+<line x1="905" y1="729" x2="1205" y2="729" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="913" y="744" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ os 7 métodos de TaskRepository</text>
+<text x="913" y="761" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">- _read(sql, params)</text>
+<text x="913" y="778" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">- _write(sql, params)</text>
+</g>
+<g id="MemoryRepository">
+<rect x="905" y="820" width="300" height="84" rx="3" fill="#ffffff" stroke="#18212b" stroke-width="1.2"/>
+<text x="1055.0" y="839" font-family="IBM Plex Sans" font-size="13.5" font-weight="600" fill="#18212b" text-anchor="middle">MemoryRepository</text>
+<line x1="905" y1="850" x2="1205" y2="850" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="913" y="865" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">- tasks: list[Task]</text>
+<line x1="905" y1="877" x2="1205" y2="877" stroke="#18212b" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="913" y="892" font-family="IBM Plex Mono" font-size="12" font-weight="400" fill="#18212b" text-anchor="start">+ os 7 métodos de TaskRepository</text>
+</g>
+<g id="api_usa_TaskService">
+<path d="M170 270 L170 370" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M165.0 359.0 L170 370 L175.0 359.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="180" y="340" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="start">usa</text>
+</g>
+<g id="cli_usa_TaskService">
+<path d="M580 185 L580 318 L300 318 L300 370" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M295.0 359.0 L300 370 L305.0 359.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="590" y="300" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="start">usa</text>
+</g>
+<g id="formt_usa_TaskDTO">
+<path d="M769 185 L769 370" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M764.0 359.0 L769 370 L774.0 359.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="779" y="300" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="start">formata</text>
+</g>
+<g id="TaskService_cria_TaskPage">
+<path d="M380 400 L420 400" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M409.0 405.0 L420 400 L409.0 395.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="400" y="392" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle">cria</text>
+</g>
+<g id="TaskService_usa_Task">
+<path d="M150 556 L150 655" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M145.0 644.0 L150 655 L155.0 644.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="160" y="603" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="start">cria / altera</text>
+</g>
+<g id="TaskService_repository">
+<path d="M370 556 L370 612 L690 612 L690 655" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<path d="M685.0 644.0 L690 655 L695.0 644.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="684" y="650" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="end">repository  1</text>
+</g>
+<g id="Task_usa_Status">
+<path d="M280 700 L320 700" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M309.0 705.0 L320 700 L309.0 695.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+</g>
+<g id="Task_lanca_InvalidTitleError">
+<path d="M280 798 L320 798" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M309.0 803.0 L320 798 L309.0 793.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="300" y="791" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle">lança</text>
+</g>
+<g id="TaskService_lanca_TaskNotFoundError">
+<path d="M250 556 L250 640 L510 640 L510 862 L500 862" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M511.0 857.0 L500 862 L511.0 867.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="470" y="634" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="middle">lança</text>
+</g>
+<g id="entry_usa_composition">
+<path d="M1055 162 L1055 182" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M1050.0 171.0 L1055 182 L1060.0 171.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+</g>
+<g id="entry_chama_adaptadores">
+<path d="M905 117 L865 117" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M876.0 112.0 L865 117 L876.0 122.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+</g>
+<g id="composition_cria_Sqlite">
+<path d="M1150 272 L1150 655" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M1145.0 644.0 L1150 655 L1155.0 644.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="1160" y="470" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="start">cria</text>
+</g>
+<g id="composition_cria_TaskService">
+<path d="M960 272 L960 575 L380 575" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M391.0 570.0 L380 575 L391.0 580.0" fill="none" stroke="#18212b" stroke-width="1.3"/>
+<text x="950" y="567" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#5b6673" text-anchor="end">injeta o repositório e cria</text>
+</g>
+<g id="Memory_implementa">
+<path d="M905 885 L885 885 L885 760" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+</g>
+<g id="Sqlite_implementa">
+<path d="M905 760 L860 760" fill="none" stroke="#18212b" stroke-width="1.3" stroke-dasharray="6 4"/>
+<path d="M874.0 753.0 L860 760 L874.0 767.0 Z" fill="#ffffff" stroke="#18212b" stroke-width="1.3"/>
+</g>
+</svg>

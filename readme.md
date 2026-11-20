@@ -72,7 +72,41 @@ make cli ARGS="list --status pending"
 | GET    | /tasks/{id}              | 200 / 404 / 422 id malformado |
 | PUT    | /tasks/{id}              | 200 / 404 / 422 |
 | POST   | /tasks/{id}/complete     | 200 / 404 / 422 |
+| POST   | /tasks/{id}/reopen       | 200 / 404 / 422 |
 | DELETE | /tasks/{id}              | 204 / 404 / 422 |
+
+Todas as rotas de `/tasks` também podem responder **429** (ver abaixo).
+
+### Rate limiting
+
+Cada cliente (IP) tem um *token bucket* em memória (`backend/api/rate_limit.py`): rajadas de até N requisições,
+reabastecidas continuamente a N por período. Acima disso a API responde `429` com `Retry-After` (segundos);
+toda resposta limitada traz `X-RateLimit-Limit` e `X-RateLimit-Remaining`. O `/health` nunca é limitado (probes).
+
+| Onde | Configuração |
+|------|--------------|
+| Variável `TODO_RATE_LIMIT` | `300/minute` (padrão), `10/second`, `1000/hour` ou `off` |
+| Compose | `TODO_RATE_LIMIT=off docker compose up -d` |
+| Helm | `--set backend.rateLimit=off` |
+| Testes de carga / E2E | já sobem o servidor com `off` |
+
+- **Contador em memória** funciona porque o backend tem 1 réplica (SQLite). Com várias réplicas, cada uma
+  contaria separado — aí o estado vai para fora (Redis) ou o limite vai para a borda.
+- **IP real atrás do nginx:** o uvicorn roda com `--proxy-headers --forwarded-allow-ips "*"`, e o nginx
+  **sobrescreve** o `X-Forwarded-For` com `$remote_addr` (um valor enviado pelo cliente seria forjado).
+  Confiar em qualquer origem só é seguro porque o backend não é exposto fora do nginx. Com Ingress, o IP visto
+  é o do controller — limite na borda (annotations) ou ajuste a cadeia de proxies.
+
+### SDKs
+
+SDKs em **TypeScript, Python e Go** em [`sdks/`](sdks/README.md), geradas a partir do `docs/openapi.yaml`, com uma
+camada fina escrita à mão: retry automático no 429 (respeitando `Retry-After`) e iteração por todas as páginas.
+
+```bash
+make sdks          # regenera o spec e o código gerado das 3 SDKs
+make sdks-check    # falha se o código gerado versionado estiver desatualizado
+make test-sdks     # unit + cada SDK contra a API real (uvicorn)
+```
 
 ## Testes
 
@@ -81,6 +115,7 @@ make test           # tudo
 make test-backend   # unit + integração + arquitetura (pytest)
 make test-frontend  # type-check + unit + arquitetura (vitest)
 make test-arch      # só arquitetura
+make test-sdks      # as 3 SDKs (unit + contra a API real)
 make test-e2e       # backend: uvicorn real + contrato OpenAPI; frontend: Playwright (API :8001 + Vite :5174)
 E2E_BASE_URL=http://localhost:8080 npx playwright test   # E2E contra o compose/cluster (APAGA os dados!)
 ```

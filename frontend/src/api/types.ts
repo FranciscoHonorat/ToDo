@@ -14,12 +14,25 @@ export interface TaskInput {
   description: string
 }
 
+export interface ListQuery {
+  status?: StatusFilter
+  limit?: number
+  offset?: number
+}
+
+/** Uma página da listagem; `total` conta todas as tarefas do filtro (header X-Total-Count). */
+export interface TaskPage {
+  items: Task[]
+  total: number
+}
+
 /** Porta para o backend — os componentes dependem disto, não do fetch (DIP). */
 export interface TaskApi {
-  list(status?: StatusFilter): Promise<Task[]>
+  list(query?: ListQuery): Promise<TaskPage>
   create(input: TaskInput): Promise<Task>
   edit(id: string, input: TaskInput): Promise<Task>
   complete(id: string): Promise<Task>
+  reopen(id: string): Promise<Task>
   remove(id: string): Promise<void>
 }
 

@@ -39,6 +39,12 @@ class TaskService:
         self.repository.update_task(task)
         return task
 
+    def reopen_task(self, task_id):
+        task = self.get_task_by_id(task_id)
+        task.reopen()
+        self.repository.update_task(task)
+        return task
+
     def edit_task(self, task_id, title, description):
         task = self.get_task_by_id(task_id)
         task.edit(title, description)

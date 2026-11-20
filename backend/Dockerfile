@@ -22,4 +22,8 @@ VOLUME /data
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+# --proxy-headers: o rate limit conta por IP do cliente, que chega no X-Forwarded-For do nginx.
+# Confiar em qualquer origem ("*") só é seguro porque o backend não é exposto: no compose e no
+# k8s ele só recebe tráfego do nginx, que sobrescreve o header (ver default.conf.template).
+ENV TODO_RATE_LIMIT=300/minute
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

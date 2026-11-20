@@ -16,8 +16,9 @@ BACKEND = Path(__file__).resolve().parents[2]
 class Server:
     """Um uvicorn de verdade, num processo separado, com banco próprio."""
 
-    def __init__(self, database: Path):
+    def __init__(self, database: Path, rate_limit: str = "off"):
         self.database = database
+        self.rate_limit = rate_limit
         self.port = _free_port()
         self.url = f"http://127.0.0.1:{self.port}"
         self.process = None
@@ -26,7 +27,7 @@ class Server:
         self.process = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "server:app", "--port", str(self.port)],
             cwd=BACKEND,
-            env={**os.environ, "TODO_DATABASE": str(self.database)},
+            env={**os.environ, "TODO_DATABASE": str(self.database), "TODO_RATE_LIMIT": self.rate_limit},
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -69,8 +70,8 @@ def _free_port():
 def make_server(tmp_path):
     servers = []
 
-    def factory(database=None):
-        server = Server(database or tmp_path / "e2e.db")
+    def factory(database=None, rate_limit="off"):
+        server = Server(database or tmp_path / "e2e.db", rate_limit)
         servers.append(server)
         return server.start()
 

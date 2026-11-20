@@ -1,38 +1,244 @@
 :root {
-  --bg: #f7f7f5;
+  --bg: #f5f5f2;
   --surface: #ffffff;
-  --text: #1f1f1f;
-  --muted: #6b6b6b;
-  --border: #e2e2de;
-  --accent: #2f6fde;
+  --surface-2: #efefeb;
+  --text: #1c1c1a;
+  --muted: #6b6b66;
+  --border: #e4e4df;
+  --accent: #3563e9;
+  --accent-2: #6a4ce6;
+  --accent-soft: #e8eefd;
+  --accent-text: #ffffff;
+  --success: #1f9d55;
+  --success-soft: #e3f5ea;
   --danger: #c0392b;
+  --danger-soft: #fdecea;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 2px 8px rgb(0 0 0 / 0.04);
+  --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.05), 0 8px 20px rgb(0 0 0 / 0.07);
+  --radius: 12px;
+  --toast-link: #9dbcff;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   color-scheme: light dark;
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #171717;
-    --surface: #222222;
+    --bg: #121212;
+    --surface: #1d1d1d;
+    --surface-2: #2a2a2a;
     --text: #ececec;
-    --muted: #9a9a9a;
-    --border: #333333;
-    --accent: #6b9cff;
+    --muted: #9a9a96;
+    --border: #2f2f2f;
+    --accent: #7a9cff;
+    --accent-2: #a58bff;
+    --accent-soft: #1f2840;
+    --accent-text: #0d1526;
+    --success: #4cc985;
+    --success-soft: #16301f;
     --danger: #ff7b6b;
+    --danger-soft: #3a1f1c;
+    --shadow: none;
+    --shadow-hover: 0 0 0 1px #3a3a3a;
+    --toast-link: #3563e9;
   }
 }
+
+* { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); }
-.app { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
-h1 { margin-top: 0; }
-button { cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; padding: 0.4rem 0.7rem; }
-button[type='submit'], button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #fff; }
-input { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; padding: 0.45rem 0.6rem; min-width: 0; }
-.task-form { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.task-form input { flex: 1 1 10rem; }
-.filter { display: flex; gap: 0.5rem; margin: 1.25rem 0 0.75rem; }
-.tasks { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
-.task { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; }
-.task .text { display: grid; gap: 0.15rem; }
-.task .description, .empty { color: var(--muted); }
-.task.done strong { text-decoration: line-through; color: var(--muted); }
-.actions { display: flex; gap: 0.4rem; }
-.error { color: var(--danger); }
+.app { max-width: 660px; margin: 0 auto; padding: 2.5rem 1rem 6rem; }
+
+/* Cabeçalho */
+.header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 1.5rem; }
+.brand { display: flex; align-items: center; gap: 0.8rem; }
+.logo {
+  display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 12px;
+  color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 4px 14px rgb(53 99 233 / 0.3);
+}
+.logo .icon { width: 22px; height: 22px; stroke-width: 2.6; }
+h1 { margin: 0; font-size: 1.6rem; line-height: 1.15; letter-spacing: -0.02em; }
+.today { margin: 0.1rem 0 0; color: var(--muted); font-size: 0.9rem; }
+
+.progress { flex: 0 1 13rem; display: grid; gap: 0.35rem; }
+.progress-label { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.progress-track { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.progress-fill {
+  height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 70%, #9be15d));
+  transition: width 0.4s var(--ease);
+}
+
+/* Controles básicos */
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+button:hover { background: var(--surface-2); }
+button:active:not(:disabled) { transform: scale(0.97); }
+button:disabled { opacity: 0.6; cursor: progress; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary {
+  background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+button.primary:hover { background: var(--accent); filter: brightness(1.08); }
+button.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+button.ghost:hover { color: var(--text); background: var(--surface-2); }
+button.link { border: none; background: none; color: var(--accent); font-weight: 600; padding: 0.25rem 0.4rem; }
+.icon-button { display: inline-grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border-color: transparent; background: transparent; color: var(--muted); }
+.icon-button:hover { color: var(--text); background: var(--surface-2); }
+.icon-button.danger:hover { color: var(--danger); background: var(--danger-soft); }
+.icon { display: block; }
+
+input {
+  font: inherit;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  min-width: 0;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+input::placeholder { color: var(--muted); }
+
+/* Formulário */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.new-task { padding: 0.75rem; transition: box-shadow 0.2s, border-color 0.2s; }
+.new-task:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: 0 0 0 4px var(--accent-soft); }
+.new-task .task-form input:focus-visible { outline: none; }
+.task-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: flex-start; width: 100%; }
+.task-form .fields { flex: 1 1 16rem; display: grid; gap: 0.2rem; }
+.task-form .title-input { font-weight: 500; font-size: 1.02rem; }
+.task-form .description-input { font-size: 0.9rem; }
+.new-task .task-form input { border-color: transparent; background: transparent; }
+.form-actions { display: flex; gap: 0.4rem; margin-left: auto; }
+.field-error { margin: 0 0 0.2rem 0.7rem; color: var(--danger); font-size: 0.85rem; }
+input[aria-invalid='true'] { border-color: var(--danger) !important; }
+
+/* Aviso de erro */
+.error {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  margin-top: 0.75rem; padding: 0.4rem 0.4rem 0.4rem 0.8rem;
+  color: var(--danger); background: var(--danger-soft); border-radius: 8px;
+}
+.error .icon-button { color: inherit; }
+
+/* Filtro (controle segmentado com contadores) */
+.filter {
+  display: inline-flex; flex-wrap: wrap; gap: 2px; margin: 1.5rem 0 0.75rem; padding: 3px;
+  background: var(--surface-2); border-radius: 10px;
+}
+.filter button { display: inline-flex; align-items: center; gap: 0.4rem; border: none; background: transparent; color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 8px; }
+.filter button:hover { color: var(--text); background: transparent; }
+.filter button[aria-pressed='true'] { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow); }
+.badge {
+  min-width: 1.4rem; padding: 0 0.35rem; border-radius: 999px; text-align: center;
+  font-size: 0.75rem; font-weight: 600; line-height: 1.35rem; font-variant-numeric: tabular-nums;
+  color: var(--muted); background: color-mix(in srgb, var(--muted) 14%, transparent);
+}
+.filter button[aria-pressed='true'] .badge { color: var(--accent); background: var(--accent-soft); }
+
+/* Lista */
+.tasks { position: relative; list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.task {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.7rem 0.6rem 0.7rem 0.8rem; box-shadow: var(--shadow);
+  transition: box-shadow 0.2s, border-color 0.2s, background-color 0.2s;
+}
+.task:hover { box-shadow: var(--shadow-hover); }
+.task.editing { padding: 0.6rem; border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: 0 0 0 4px var(--accent-soft); }
+.task .text { flex: 1; min-width: 0; display: grid; gap: 0.1rem; }
+.task .text strong { font-weight: 500; overflow-wrap: anywhere; transition: color 0.2s; }
+.task .description { color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+.task.done { background: color-mix(in srgb, var(--surface) 55%, var(--bg)); box-shadow: none; }
+.task.done .text strong { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); color: var(--muted); }
+.task.done .description { opacity: 0.75; }
+
+.check {
+  flex: none; display: inline-grid; place-items: center;
+  width: 1.5rem; height: 1.5rem; padding: 0; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--muted) 45%, transparent); background: transparent; color: transparent;
+}
+button.check:hover { border-color: var(--success); color: var(--success); background: var(--success-soft); }
+.check.checked { border-color: var(--success); background: var(--success); color: var(--surface); animation: pop 0.3s var(--ease); }
+button.check.checked:hover { background: var(--success); color: var(--surface); opacity: 0.75; }
+.check .icon { width: 14px; height: 14px; stroke-width: 3; }
+@keyframes pop { 0% { transform: scale(0.6); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+.actions { display: flex; gap: 0.15rem; }
+/* Em telas com mouse, as ações aparecem ao passar o mouse ou focar com teclado. */
+@media (hover: hover) and (pointer: fine) {
+  .task .actions { opacity: 0; transition: opacity 0.15s; }
+  .task:hover .actions, .task:focus-within .actions { opacity: 1; }
+}
+
+/* Animações da lista (TransitionGroup name="task") */
+.task-enter-active, .task-leave-active { transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); }
+.task-enter-from { opacity: 0; transform: translateY(-6px); }
+.task-leave-to { opacity: 0; transform: translateX(16px); }
+.task-leave-active { position: absolute; left: 0; right: 0; }
+.task-move { transition: transform 0.25s var(--ease); }
+
+.load-more { display: block; width: 100%; margin-top: 0.5rem; padding: 0.6rem; color: var(--muted); background: transparent; border-style: dashed; }
+.load-more:hover { color: var(--text); }
+
+/* Carregando */
+.skeleton { height: 3.3rem; background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* Vazio */
+.empty-state { text-align: center; padding: 2rem 1rem 2.25rem; border: 1px dashed var(--border); border-radius: var(--radius); }
+.empty-state p { margin: 0; }
+.illustration { width: 120px; height: 96px; margin-bottom: 0.5rem; }
+.ill-soft { fill: var(--surface-2); }
+.ill-accent-fill { fill: var(--accent); }
+.ill-stroke { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.ill-muted { stroke: color-mix(in srgb, var(--muted) 55%, transparent); }
+.ill-accent { stroke: var(--success); }
+.ill-on-accent { stroke: #fff; stroke-width: 3; }
+.empty-done .ill-soft { fill: var(--success-soft); }
+.empty { color: var(--text); font-weight: 600; }
+.hint { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem !important; }
+
+/* Aviso "Desfazer" */
+.toast {
+  position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0.5rem;
+  max-width: calc(100% - 2rem); padding: 0.45rem 0.45rem 0.45rem 0.9rem;
+  background: var(--text); color: var(--bg); border-radius: 12px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.22);
+}
+.toast span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toast .link { color: var(--toast-link); }
+.toast .icon-button { color: inherit; opacity: 0.7; }
+.toast .icon-button:hover { background: transparent; opacity: 1; }
+.toast-enter-active, .toast-leave-active { transition: opacity 0.2s var(--ease), transform 0.2s var(--ease); }
+.toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, 0.75rem); }
+
+/* Telas de toque: alvos maiores (mín. ~40px). */
+@media (pointer: coarse) {
+  .check { width: 1.9rem; height: 1.9rem; }
+  .icon-button { width: 2.5rem; height: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+  .app { padding-top: 1.5rem; }
+  .progress { flex-basis: 100%; }
+  .filter { display: flex; }
+  .filter button { flex: 1; justify-content: center; padding-inline: 0.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

@@ -43,6 +43,8 @@ spec:
               value: /data/todo.db
             - name: API_ROOT_PATH
               value: /api
+            - name: TODO_RATE_LIMIT
+              value: {{ .Values.backend.rateLimit | quote }}
           ports:
             - name: http
               containerPort: {{ $b.port }}

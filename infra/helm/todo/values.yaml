@@ -4,6 +4,10 @@ backend:
     tag: local
     pullPolicy: IfNotPresent
   port: 8000
+  # Requisições por cliente (IP): "<n>/second|minute|hour" ou "off". Contador em memória,
+  # válido porque o backend tem 1 réplica. Com Ingress, o IP visto é o do controller:
+  # nesse caso prefira limitar na borda (annotations do Ingress) ou ajustar o X-Forwarded-For.
+  rateLimit: "300/minute"
   resources:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { memory: 256Mi }

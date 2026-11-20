@@ -25,6 +25,14 @@ def test_complete_marks_task_as_completed():
     assert task.status == Status.COMPLETED
 
 
+def test_reopen_marks_a_completed_task_as_pending():
+    task = Task(title="Test Task", description="", status=Status.COMPLETED)
+
+    task.reopen()
+
+    assert task.status == Status.PENDING
+
+
 def test_empty_title_raises_invalid_title_error():
     with pytest.raises(InvalidTitleError):
         Task(title="", description="This is a test task.")

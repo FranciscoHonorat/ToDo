@@ -19,6 +19,7 @@ dev = [
     "openapi-spec-validator>=0.9.0",
     "pre-commit>=4.0",
     "black>=26.10.1",
+    "bandit>=1.9.4",
 ]
 load = [
     "locust>=2.46.7",
@@ -77,3 +78,7 @@ modules = ["api", "ui"]
 
 [tool.black]
 line-length = 120   # igual ao max-line-length do .flake8
+
+[tool.bandit]
+# Testes usam assert de propósito (B101); .venv é código de terceiros.
+exclude_dirs = ["tests", ".venv"]

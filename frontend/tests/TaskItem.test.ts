@@ -79,4 +79,22 @@ describe('TaskItem', () => {
     expect(wrapper.find('form').exists()).toBe(false)
     expect(save).not.toHaveBeenCalled()
   })
+
+  it('icon buttons have accessible names', () => {
+    const { wrapper } = mountItem()
+
+    expect(wrapper.get('[data-test="complete"]').attributes('aria-label')).toBe('Concluir')
+    expect(wrapper.get('[data-test="edit"]').attributes('aria-label')).toBe('Editar')
+    expect(wrapper.get('[data-test="remove"]').attributes('aria-label')).toBe('Remover')
+  })
+
+  it('a completed task can be reopened', async () => {
+    const { wrapper } = mountItem({ ...pending, status: 'COMPLETED' })
+
+    const reopen = wrapper.get('[data-test="reopen"]')
+    expect(reopen.attributes('aria-label')).toBe('Reabrir')
+    await reopen.trigger('click')
+
+    expect(wrapper.emitted('reopen')).toEqual([['1']])
+  })
 })

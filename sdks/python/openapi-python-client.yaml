@@ -1,0 +1,4 @@
+# Configuração do gerador (make sdk-python). O código gerado fica em todo_api_client/generated/.
+project_name_override: todo-api-client
+package_name_override: generated
+post_hooks: []
